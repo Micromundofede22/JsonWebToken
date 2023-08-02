@@ -23,11 +23,10 @@ viewsRouter.get("/products", async (req, res) => {
             ? `/views/products?page=${products.nextPage}&limit=${limit}`
             : ""
 
-            const username= (req.user.first_name).toUpperCase()
-            const role= (req.user.role).toUpperCase()
             
+            const user= req.user.user
 
-        res.render("home", {products:products, username, role});
+        res.render("home", {products:products, user});
     } catch (err) {
         res.render("Error del servidor")
     }

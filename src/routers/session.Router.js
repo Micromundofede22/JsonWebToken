@@ -1,5 +1,6 @@
 import { Router } from "express";
 import passport from "passport";
+import {JWT_COOKIE_NAME} from "../utils.js"
 
 
 
@@ -14,7 +15,8 @@ router.get('/', (req, res) => {
 // API para login
 router.post('/login', passport.authenticate('loginPass', { failureRedirect: '/failLogin' }),
     async (req, res) => {
-        res.redirect('/views/products')
+        res.cookie(JWT_COOKIE_NAME, req.user.token).redirect('/views/products') //en la cookie guardo el token
+        
     }
 )
 
@@ -51,10 +53,7 @@ router.get("/github",
 router.get('/githubcallback',
     passport.authenticate('github', { failureRedirect: '/' }),
     async (req, res) => {
-        console.log('Callback: ', req.user)
-        req.session.user = req.user
-        console.log('User session: ', req.session.user)
-        res.redirect('/views/products') //si pasa la autenticacion de github, redirije a products
+        res.cookie(JWT_COOKIE_NAME, req.user.token).redirect('/views/products')
     }
 ) 
 
@@ -73,20 +72,13 @@ router.get("/googlecallback",
     passport.authenticate("googlePass",{ failureRedirect: '/' }),
     async (req, res) => {
         console.log('Callback: ', req.user)
-        req.session.user = req.user
-        console.log('User session: ', req.session.user)
-        res.redirect('/views/products') //si pasa la autenticacion de github, redirije a products
+        res.cookie(JWT_COOKIE_NAME, req.user.token).redirect('/views/products')
     })
 
 
 // Cerrar Session
 router.get('/logout', (req, res) => {
-    req.session.destroy(err => {
-        if (err) {
-            console.log(err);
-            res.status(500).render('errors/base', { error: err })
-        } else res.redirect('/')
-    })
+    res.clearCookie(JWT_COOKIE_NAME).redirect("/")
 })
 
 

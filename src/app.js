@@ -14,6 +14,9 @@ import session from "express-session"; //DEPENDENCIA SESSION (guarda cookie)
 import MongoStore from "connect-mongo"; //DEPENDENCIA guardar datos en MONGO
 import passport from "passport";
 import initializePassport from "./config/passport.config.js";
+import { passportCall } from "./middleware/middleware.js";
+import cookieParser from "cookie-parser";
+
 
 
 
@@ -25,21 +28,14 @@ app.engine('handlebars', handlebars.engine())
 app.set('views', './views')
 app.set('view engine', 'handlebars')
 
+app.use(cookieParser())
 app.use(express.json()) //para que mi servidor pueda recibir json del cliente
 app.use(express.urlencoded({ extended: true })) //para que mi servidor pueda recibir json que llegan por formulario por vista desde el cliente
 app.use(express.static("./public"))
 
 
 // MIDLEWARE CREA SESSION Y GUARDA EN DB MONGO
-app.use(session({ //SESSION ES UN OBJETO
-    store: MongoStore.create({ //ALMACENA EN MONGO
-        mongoUrl: "mongodb+srv://fedecoder:fedecoder@cluster0.irwwxpb.mongodb.net",
-        dbName: "ecommers",
-        mongoOptions: {
-            useNewUrlParser: true,
-            useUnifiedTopology: true
-        }
-    }),
+app.use(session({ 
     secret: "palabraclave",
     resave: true,
     saveUninitialized: true
@@ -52,7 +48,7 @@ app.use(passport.session())
 
 
 app.use("/", sessionRouter) //ruta crea session
-app.use("/views", viewsRouter) //ruta html Onwire products y cart
+app.use("/views",passportCall("jwt"), viewsRouter) //ruta html Onwire products y cart, con middleware que hace ruta privada usando el token como capa de acceso. La estrategy "jwt" esta instanciada en passport config
 app.use("/chat", routerChat) //ruta html Onwire chat
 
 app.use("/post", multerRouter) //ruta multer carga archivos
