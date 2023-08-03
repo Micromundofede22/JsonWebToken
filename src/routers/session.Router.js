@@ -53,6 +53,7 @@ router.get("/github",
 router.get('/githubcallback',
     passport.authenticate('github', { failureRedirect: '/' }),
     async (req, res) => {
+        // console.log('Callback: ', req.user)
         res.cookie(JWT_COOKIE_NAME, req.user.token).redirect('/views/products')
     }
 ) 

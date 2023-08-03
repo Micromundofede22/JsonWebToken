@@ -24,7 +24,7 @@ viewsRouter.get("/products", async (req, res) => {
             : ""
 
             
-            const user= req.user.user
+            const user= req.user.user //porque user lo metimos dentro de una variable user en utils, generateToken 
 
         res.render("home", {products:products, user});
     } catch (err) {
