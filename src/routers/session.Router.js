@@ -1,8 +1,7 @@
 import { Router } from "express";
 import passport from "passport";
 import {JWT_COOKIE_NAME} from "../utils.js"
-
-
+import { uploader } from "../middleware/multer.js";
 
 const router = Router()
 
@@ -33,9 +32,9 @@ router.get('/register', (req, res) => {
 
 
 // API para crear usuarios en la DB
-router.post('/register', passport.authenticate('registerPass', {
+router.post('/register',uploader.single("file"), passport.authenticate('registerPass', {
     failureRedirect: '/failRegister' //si no registra, que redirija a fail 
-}), async (req, res) => {
+}),  async (req, res) => {
     res.redirect('/') //si registra, redirije al login
 })
 

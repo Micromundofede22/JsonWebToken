@@ -2,7 +2,7 @@
 
     <h2 class="row justify-content-center">Registrarse</h2>
 {{!-- action register me redirecciona a esa ruta, haciendo un post --}}
-    <form class="w-25 " action="/register" method="post">  
+    <form class="w-25 " action="/register" method="post" enctype="multipart/form-data">  
         <div class="mb-3">
             <label for="exampleInputPassword1" class="form-label">Nombre</label>
             <input type="text" name="first_name" class="form-control" id="exampleInputPassword1">
@@ -28,6 +28,10 @@
         <div class="mb-3">
             <label for="exampleInputPassword1" class="form-label">Contraseña</label>
             <input type="text" name="password" class="form-control" id="exampleInputPassword1">
+        </div>
+
+        <div class="mb-3"> 
+            Foto de perfil(no obligatoria)<input type="file" name="file">
         </div>
 
         <button type="submit" class="btn btn-success">Crear</button>

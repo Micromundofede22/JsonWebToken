@@ -1,17 +1,24 @@
 <div class="container">
 
-<div class="row justify-content-center">
-    <div class="col-1">
-        <img src={{user.photograph}} alt="foto perfil" class="rounded-circle" width="72" height="72">
-    </div>
-    <div class="col-10 ">
-        <h3>Bienvenido: {{user.first_name}}</h3>
-        <h4>Rol: {{user.role}}</h4>
-   <a class="text-decoration-none text-reset"  href="/logout"><strong>Cerrar sesión</strong> </a>
-       
-    </div>
+    <div class="row justify-content-center">
+        <div class="col-1">
+            {{!-- para usar if else, construir helpers en configuracion de handlebars --}}
+            {{#if (igual user.servicio "local") }}
+            <img src="/assets/{{user.file}}" alt="foto perfil" class="rounded-circle" width="72" height="72">
+            {{else}}
+            <img src={{user.file}} alt="foto perfil" class="rounded-circle" width="72" height="72">
+            {{/if}}
 
-</div>
+            
+        </div>
+        <div class="col-10 ">
+            <h3>Bienvenido: {{user.first_name}}</h3>
+            <h4>Rol: {{user.role}}</h4>
+            <a class="text-decoration-none text-reset" href="/logout"><strong>Cerrar sesión</strong> </a>
+
+        </div>
+
+    </div>
 </div>
 
 <div>
@@ -45,20 +52,23 @@
         </tbody>
     </table>
 
-<div>
-<nav aria-label="Page navigation example row ">
-  <ul class="pagination justify-content-center">
-    {{#if hasPrevPage}}
-    <li class="page-item"><a class="page-link bg-success text-white" href="{{prevLink}}">Previous</a></li>
-     {{/if}}
-     {{#if hasNextPage}}
-    <li class="page-item"><a class="page-link bg-success text-white" href="{{nextLink}}">Next</a></li>
-    {{/if}}
-  </ul>
-</nav>
-</div>
+    <div>
+        <nav aria-label="Page navigation example row ">
+            <ul class="pagination justify-content-center">
+                {{#if hasPrevPage}}
+                <li class="page-item"><a class="page-link bg-success text-white" href="{{prevLink}}">Previous</a></li>
+                {{/if}}
+                {{#if hasNextPage}}
+                <li class="page-item"><a class="page-link bg-success text-white" href="{{nextLink}}">Next</a></li>
+                {{/if}}
+            </ul>
+        </nav>
+    </div>
 
 </div>
+
+
 
 
 <script src="/js/addProduct.js"></script>
+

@@ -10,7 +10,7 @@ const userSchema = new mongoose.Schema({
     password: String,
     role: {type: String, default: "user"},
     servicio: {type: String, required: false},
-    photograph: {type: String, required: false}
+    file: {type: String || File, required: false}
 })
 
 mongoose.set("strictQuery", false)

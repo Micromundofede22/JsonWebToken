@@ -24,9 +24,20 @@ const app = express()
 
 
 //configuracion del motor de plantillas
-app.engine('handlebars', handlebars.engine())
+app.engine('handlebars', handlebars.engine({
+    helpers: {
+        igual: function (value, value2) {
+            if (value == value2) {
+                return true;
+            }else{
+                return false;
+            }
+        }
+    }
+}))
 app.set('views', './views')
 app.set('view engine', 'handlebars')
+
 
 app.use(cookieParser())
 app.use(express.json()) //para que mi servidor pueda recibir json del cliente
@@ -35,7 +46,7 @@ app.use(express.static("./public"))
 
 
 // MIDLEWARE CREA SESSION Y GUARDA EN DB MONGO
-app.use(session({ 
+app.use(session({
     secret: "palabraclave",
     resave: true,
     saveUninitialized: true
@@ -48,7 +59,7 @@ app.use(passport.session())
 
 
 app.use("/", sessionRouter) //ruta crea session
-app.use("/views",passportCall("jwt"), viewsRouter) //ruta html Onwire products y cart, con middleware que hace ruta privada usando el token como capa de acceso. La estrategy "jwt" esta instanciada en passport config
+app.use("/views", passportCall("jwt"), viewsRouter) //ruta html Onwire products y cart, con middleware que hace ruta privada usando el token como capa de acceso. La estrategy "jwt" esta instanciada en passport config
 app.use("/chat", routerChat) //ruta html Onwire chat
 
 app.use("/post", multerRouter) //ruta multer carga archivos

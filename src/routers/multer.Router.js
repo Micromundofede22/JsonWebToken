@@ -3,7 +3,7 @@ import { uploader } from "../middleware/multer.js";
 
 const router= Router()
 
-router.post("/", uploader.single("file"), (req,res)=>{ //uploader.single es para q se suba un archivo simple llamado file. (uploader.array me permite subir varios archivos)
+router.post("/", uploader.single("file"), (req,res)=>{ //uploader.single es para q se suba un archivo simple llamado file(el campo en html debe ser name="file"). (uploader.array me permite subir varios archivos)
     if (!req.file) {
         res.status(400).json({status: "error", error: "archivo no se ha enviado"})
     } else {

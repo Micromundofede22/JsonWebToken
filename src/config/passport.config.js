@@ -20,6 +20,7 @@ const initializePassport = () => {
         usernameField: 'email'
     }, async (req, username, password, done) => {
         const { first_name, last_name, email, age } = req.body
+        const file= req.file.filename
 
         try {
             // BUSCA USUARIO YA REGISTRADO 
@@ -31,7 +32,7 @@ const initializePassport = () => {
             }
             // SI NO EXISTE USUARIO, SE REGISTRA UNO NUEVO
             const newUser = {
-                first_name, last_name, email, age, password: createHash(password)
+                first_name, last_name, email, age, servicio:"local" , password: createHash(password), file
             }
             const result = await UserModel.create(newUser)
             return done(null, result)
@@ -53,7 +54,6 @@ const initializePassport = () => {
 
             const token = generateToken(user) //generatetoken importado de utils, donde mete los datos del user en un token
             user.token = token //a user le agrego este atributo token, asi el user que me devuelve passport ya esta dentro de un token
-
             return done(null, user)
         } catch (err) {
 
@@ -79,7 +79,7 @@ const initializePassport = () => {
                     password: " ",
                     role: "user",
                     servicio: "GitHub",
-                    photograph: profile._json.avatar_url
+                    file: profile._json.avatar_url
                 })
                 const token = generateToken(newUser)
                 newUser.token = token
@@ -115,7 +115,7 @@ const initializePassport = () => {
                         password: " ",
                         role: "user",
                         servicio: "Google",
-                        photograph: profile._json.picture
+                        file: profile._json.picture
                     })
 
                     const token = generateToken(newUser)
