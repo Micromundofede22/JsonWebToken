@@ -5,6 +5,7 @@ import GitHubStrategy from "passport-github2"
 import { OAuth2Strategy as GoogleStrategy } from "passport-google-oauth"
 import passport_jwt from "passport-jwt"
 import { createHash, isValidPassword, extractCookie, JWT_PRIVATE_KEY, generateToken } from '../utils.js'
+import { cartsModel } from "../dao/models/cart.model.js"
 
 
 const LocalStrategy = local.Strategy
@@ -31,8 +32,17 @@ const initializePassport = () => {
 
             }
             // SI NO EXISTE USUARIO, SE REGISTRA UNO NUEVO
+            const cartForNewUser= await cartsModel.create({}) //creamos un carrito
             const newUser = {
-                first_name, last_name, email, age, servicio:"local" , password: createHash(password), file
+                first_name,
+                 last_name,
+                  email, 
+                  age, 
+                  servicio:"local" , 
+                  password: createHash(password), 
+                file, 
+                cart: cartForNewUser._id, //al nuevo usuario le asignamos el carrito que armamos mas arriba
+                role: (email === "adminCoder@coder.com")? "admin" : "user"
             }
             const result = await UserModel.create(newUser)
             return done(null, result)
@@ -73,13 +83,15 @@ const initializePassport = () => {
                 user.token = token
                 if (user) return done(null, user)
             } else {
+                const cartForNewUser= await cartsModel.create({})
                 const newUser = await UserModel.create({
                     first_name: profile._json.name,
                     email: profile._json.email,
                     password: " ",
                     role: "user",
                     servicio: "GitHub",
-                    file: profile._json.avatar_url
+                    file: profile._json.avatar_url,
+                    cart: cartForNewUser._id
                 })
                 const token = generateToken(newUser)
                 newUser.token = token
@@ -109,13 +121,15 @@ const initializePassport = () => {
                     user.token = token
                     if (user) return done(null, user)
                 } else {
+                    const cartForNewUser= await cartsModel.create({})
                     const newUser = await UserModel.create({
                         first_name: profile._json.name,
                         email: profile._json.email,
                         password: " ",
                         role: "user",
                         servicio: "Google",
-                        file: profile._json.picture
+                        file: profile._json.picture,
+                        cart: cartForNewUser._id
                     })
 
                     const token = generateToken(newUser)

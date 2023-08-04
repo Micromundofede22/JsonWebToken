@@ -76,6 +76,12 @@ router.get("/googlecallback",
     })
 
 
+//datos cliente
+router.get("/current", (req,res)=>{
+    if(!req.user) return res.status(401).json({status: "error", error: "Sesión no detectada, inicia sesión"})
+    res.status(200).json({status: "success", payload: req.user})
+}) 
+
 // Cerrar Session
 router.get('/logout', (req, res) => {
     res.clearCookie(JWT_COOKIE_NAME).redirect("/")
