@@ -5,13 +5,12 @@ import handlebars from "express-handlebars"
 import { Server } from "socket.io";
 import viewsRouter from "./routers/views.Router.js"
 import mongoose from "mongoose"
-import multerRouter from "./routers/multer.Router.js"
 import routerChat from "./routers/chat.Router.js"
 import sessionRouter from "./routers/session.Router.js"
 import { messagesModel } from "./dao/models/message.model.js";
 
 import session from "express-session"; //DEPENDENCIA SESSION (guarda cookie)
-import MongoStore from "connect-mongo"; //DEPENDENCIA guardar datos en MONGO
+// import MongoStore from "connect-mongo"; //DEPENDENCIA guardar datos en MONGO
 import passport from "passport";
 import initializePassport from "./config/passport.config.js";
 import { passportCall } from "./middleware/passportCall.js";
@@ -59,8 +58,6 @@ app.use(passport.session())
 app.use("/", sessionRouter) //ruta crea session
 app.use("/views", passportCall("jwt"), viewsRouter) //ruta html Onwire products y cart, con middleware passportCall (en la ) que hace ruta privada usando el token como capa de acceso. La estrategy "jwt" esta instanciada en passport config
 app.use("/chat", routerChat) //ruta html Onwire chat
-
-app.use("/post", multerRouter) //ruta multer carga archivos
 app.use('/api/products', productRouter) //ruta data Onwire
 app.use('/api/carts', cartRouter) //ruta data Onwire
 
