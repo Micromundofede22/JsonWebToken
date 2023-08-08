@@ -8,8 +8,8 @@ import { createHash, isValidPassword, extractCookie, JWT_PRIVATE_KEY, generateTo
 import { cartsModel } from "../dao/models/cart.model.js"
 
 
-const LocalStrategy = local.Strategy
-const JWTStrategy = passport_jwt.Strategy
+const LocalStrategy = local.Strategy //estrategia local
+const JWTStrategy = passport_jwt.Strategy //estrategia jwt
 const ExtractJWT = passport_jwt.ExtractJwt //extrae token de cookie
 
 
@@ -21,7 +21,6 @@ const initializePassport = () => {
         usernameField: 'email'
     }, async (req, username, password, done) => {
         const { first_name, last_name, email, age } = req.body
-        const file= req.file.filename
 
         try {
             // BUSCA USUARIO YA REGISTRADO 
@@ -32,17 +31,17 @@ const initializePassport = () => {
 
             }
             // SI NO EXISTE USUARIO, SE REGISTRA UNO NUEVO
-            const cartForNewUser= await cartsModel.create({}) //creamos un carrito
+            const cartForNewUser = await cartsModel.create({}) //creamos un CARRITO
             const newUser = {
                 first_name,
-                 last_name,
-                  email, 
-                  age, 
-                  servicio:"local" , 
-                  password: createHash(password), 
-                file, 
+                last_name,
+                email,
+                age,
+                servicio: "local",
+                password: createHash(password),
+                file: req.file.filename, //file.filename(recibir archivo, y con su nombre original )
                 cart: cartForNewUser._id, //al nuevo usuario le asignamos el carrito que armamos mas arriba
-                role: (email === "adminCoder@coder.com")? "admin" : "user"
+                role: (email === "adminCoder@coder.com") ? "admin" : "user"
             }
             const result = await UserModel.create(newUser)
             return done(null, result)
@@ -81,11 +80,13 @@ const initializePassport = () => {
             if (user) {
                 const token = generateToken(user)
                 user.token = token
-                if (user) return done(null, user)
+                return done(null, user)
             } else {
-                const cartForNewUser= await cartsModel.create({})
+                const cartForNewUser = await cartsModel.create({})
+
                 const newUser = await UserModel.create({
                     first_name: profile._json.name,
+                    last_name: null,
                     email: profile._json.email,
                     password: " ",
                     role: "user",
@@ -98,10 +99,6 @@ const initializePassport = () => {
 
                 return done(null, newUser)
             }
-
-
-
-
         } catch (err) {
             return done(`Error to login with GitHub => ${err.message}`)
         }
@@ -115,15 +112,19 @@ const initializePassport = () => {
     },
         async (accessToken, refreshToken, profile, done) => {
             try {
+                // busca usuarios ya registrados
                 const user = await UserModel.findOne({ email: profile._json.email })
+                // console.log(profile) //profile tiene todos los datos del user de google
                 if (user) {
                     const token = generateToken(user)
                     user.token = token
                     if (user) return done(null, user)
+                    // registra nuevos usuarios
                 } else {
-                    const cartForNewUser= await cartsModel.create({})
+                    const cartForNewUser = await cartsModel.create({})
                     const newUser = await UserModel.create({
                         first_name: profile._json.name,
+                        last_name: profile._json.family_name,
                         email: profile._json.email,
                         password: " ",
                         role: "user",
@@ -143,6 +144,8 @@ const initializePassport = () => {
     )
     );
 
+
+    // esta estrategia se usa en un middleware asi: ruta, middleware("jwt"), router
     passport.use('jwt', new JWTStrategy({
         jwtFromRequest: ExtractJWT.fromExtractors([extractCookie]), //extractCookie importado de utils
         secretOrKey: JWT_PRIVATE_KEY //constante de clave secreta importada de utils

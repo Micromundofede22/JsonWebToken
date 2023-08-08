@@ -1,9 +1,12 @@
 import { Router } from "express";
 import passport from "passport";
-import {JWT_COOKIE_NAME} from "../utils.js"
+import { JWT_COOKIE_NAME } from "../utils.js"
 import { uploader } from "../middleware/multer.js";
+import { signedCookie } from "cookie-parser";
 
 const router = Router()
+
+
 
 // Vista de Login
 router.get('/', (req, res) => {
@@ -14,8 +17,8 @@ router.get('/', (req, res) => {
 // API para login
 router.post('/login', passport.authenticate('loginPass', { failureRedirect: '/failLogin' }),
     async (req, res) => {
-        res.cookie(JWT_COOKIE_NAME, req.user.token).redirect('/views/products') //en la cookie guardo el token
-        
+        res.cookie(JWT_COOKIE_NAME, req.user.token, signedCookie("clavesecreta")).redirect('/views/products') //en la cookie guardo el token
+
     }
 )
 
@@ -32,11 +35,15 @@ router.get('/register', (req, res) => {
 
 
 // API para crear usuarios en la DB
-router.post('/register',uploader.single("file"), passport.authenticate('registerPass', {
-    failureRedirect: '/failRegister' //si no registra, que redirija a fail 
-}),  async (req, res) => {
-    res.redirect('/') //si registra, redirije al login
-})
+router.post('/register',
+
+uploader.single("file")
+,
+    passport.authenticate('registerPass', { //uploader.single("file") es el middleware de multer para subir fotos. "file, porque en el formulario el name es file"
+        failureRedirect: '/failRegister' //si no registra, que redirija a fail 
+    }), async (req, res) => {
+        res.redirect('/') //si registra, redirije al login
+    })
 
 router.get('/failRegister', (req, res) => {
     res.send({ error: 'Faileed!' })            //ruta de fail
@@ -55,7 +62,7 @@ router.get('/githubcallback',
         // console.log('Callback: ', req.user)
         res.cookie(JWT_COOKIE_NAME, req.user.token).redirect('/views/products')
     }
-) 
+)
 
 router.get("/google",
     passport.authenticate("googlePass", {
@@ -69,18 +76,18 @@ router.get("/google",
 )
 
 router.get("/googlecallback",
-    passport.authenticate("googlePass",{ failureRedirect: '/' }),
+    passport.authenticate("googlePass", { failureRedirect: '/' }),
     async (req, res) => {
-        console.log('Callback: ', req.user)
+        // console.log('Callback: ', req.user)
         res.cookie(JWT_COOKIE_NAME, req.user.token).redirect('/views/products')
     })
 
 
 //datos cliente
-router.get("/current", (req,res)=>{
-    if(!req.user) return res.status(401).json({status: "error", error: "Sesión no detectada, inicia sesión"})
-    res.status(200).json({status: "success", payload: req.user})
-}) 
+router.get("/current", (req, res) => {
+    if (!req.user) return res.status(401).json({ status: "error", error: "Sesión no detectada, inicia sesión" })
+    res.status(200).json({ status: "success", payload: req.user })
+})
 
 // Cerrar Session
 router.get('/logout', (req, res) => {

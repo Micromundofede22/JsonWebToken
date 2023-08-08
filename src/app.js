@@ -14,7 +14,7 @@ import session from "express-session"; //DEPENDENCIA SESSION (guarda cookie)
 import MongoStore from "connect-mongo"; //DEPENDENCIA guardar datos en MONGO
 import passport from "passport";
 import initializePassport from "./config/passport.config.js";
-import { passportCall } from "./middleware/middleware.js";
+import { passportCall } from "./middleware/passportCall.js";
 import cookieParser from "cookie-parser";
 
 
@@ -25,12 +25,10 @@ const app = express()
 
 //configuracion del motor de plantillas
 app.engine('handlebars', handlebars.engine({
-    helpers: {
+    helpers: { //permiten realizar el if en las plantillas
         igual: function (value, value2) {
             if (value == value2) {
                 return true;
-            }else{
-                return false;
             }
         }
     }
@@ -59,7 +57,7 @@ app.use(passport.session())
 
 
 app.use("/", sessionRouter) //ruta crea session
-app.use("/views", passportCall("jwt"), viewsRouter) //ruta html Onwire products y cart, con middleware que hace ruta privada usando el token como capa de acceso. La estrategy "jwt" esta instanciada en passport config
+app.use("/views", passportCall("jwt"), viewsRouter) //ruta html Onwire products y cart, con middleware passportCall (en la ) que hace ruta privada usando el token como capa de acceso. La estrategy "jwt" esta instanciada en passport config
 app.use("/chat", routerChat) //ruta html Onwire chat
 
 app.use("/post", multerRouter) //ruta multer carga archivos
