@@ -8,23 +8,25 @@ import mongoose from "mongoose"
 import routerChat from "./routers/chat.Router.js"
 import sessionRouter from "./routers/session.Router.js"
 import { messagesModel } from "./dao/models/message.model.js";
-
 import session from "express-session"; //DEPENDENCIA SESSION (guarda cookie)
 // import MongoStore from "connect-mongo"; //DEPENDENCIA guardar datos en MONGO
 import passport from "passport";
 import initializePassport from "./config/passport.config.js";
 import { passportCall } from "./middleware/passportCall.js";
-import cookieParser from "cookie-parser";
+import cookieParser from "cookie-parser"; //crea cookie (para jwt)
+import config from "./config/config.js"; //para leer variables de entorno
+import cors from "cors"
 
-
-
+//variables de entorno
+const port= config.port
+const mongoUri= config.mongo_uri
 
 const app = express()
 
 
 //configuracion del motor de plantillas
 app.engine('handlebars', handlebars.engine({
-    helpers: { //permiten realizar el if en las plantillas
+    helpers: { //permiten realizar if en las plantillas
         igual: function (value, value2) {
             if (value == value2) {
                 return true;
@@ -35,20 +37,19 @@ app.engine('handlebars', handlebars.engine({
 app.set('views', './views')
 app.set('view engine', 'handlebars')
 
-
-app.use(cookieParser())
+app.use(cors()) // permite conexiones de front que estan en otros dominios a mi servidor 
+app.use(cookieParser()) //crea cookies (se usan para que se guarde el token)
 app.use(express.json()) //para que mi servidor pueda recibir json del cliente
 app.use(express.urlencoded({ extended: true })) //para que mi servidor pueda recibir json que llegan por formulario por vista desde el cliente
 app.use(express.static("./public"))
 
 
-// MIDLEWARE CREA SESSION Y GUARDA EN DB MONGO
+// MIDLEWARE CREA SESSION NECESARIA PARA PASSPORT
 app.use(session({
     secret: "palabraclave",
     resave: true,
     saveUninitialized: true
 }))
-
 // CONFIGURACION PASSPORT 
 initializePassport()
 app.use(passport.initialize())
@@ -63,8 +64,9 @@ app.use('/api/carts', cartRouter) //ruta data Onwire
 
 
 
-await mongoose.connect("mongodb+srv://fedecoder:fedecoder@cluster0.irwwxpb.mongodb.net/ecommers")
-const serverHTTP = app.listen(8080, () => console.log("Server up")) //inica servidor http
+await mongoose.connect(mongoUri)
+
+const serverHTTP = app.listen(port, () => console.log(`Server up ${port}`)) //inica servidor http
 
 const io = new Server(serverHTTP) // instancia servidor socketio y enlaza al server http
 app.set("socketio", io) //creo objeto con el servidor io asi lo uso en toda la app

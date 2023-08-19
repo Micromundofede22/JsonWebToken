@@ -1,12 +1,13 @@
 import { Router } from "express";
 import passport from "passport";
-import { JWT_COOKIE_NAME } from "../utils.js"
 import { uploader } from "../middleware/multer.js";
 import { signedCookie } from "cookie-parser";
+import config from "../config/config.js";
+
+//variable de entorno
+const JWT_COOKIE_NAME= config.cookieNameJWT
 
 const router = Router()
-
-
 
 // Vista de Login
 router.get('/', (req, res) => {
@@ -18,7 +19,6 @@ router.get('/', (req, res) => {
 router.post('/login', passport.authenticate('loginPass', { failureRedirect: '/failLogin' }),
     async (req, res) => {
         res.cookie(JWT_COOKIE_NAME, req.user.token, signedCookie("clavesecreta")).redirect('/views/products') //en la cookie guardo el token
-
     }
 )
 
@@ -36,10 +36,9 @@ router.get('/register', (req, res) => {
 
 // API para crear usuarios en la DB
 router.post('/register',
-
-uploader.single("file")
-,
-    passport.authenticate('registerPass', { //uploader.single("file") es el middleware de multer para subir fotos. "file, porque en el formulario el name es file"
+        uploader.single("file")//uploader.single("file") es el middleware de multer para subir fotos. "file, porque en el formulario el name es file"
+, 
+    passport.authenticate('registerPass', { 
         failureRedirect: '/failRegister' //si no registra, que redirija a fail 
     }), async (req, res) => {
         res.redirect('/') //si registra, redirije al login

@@ -4,13 +4,18 @@ import UserModel from '../dao/models/user.model.js'
 import GitHubStrategy from "passport-github2"
 import { OAuth2Strategy as GoogleStrategy } from "passport-google-oauth"
 import passport_jwt from "passport-jwt"
-import { createHash, isValidPassword, extractCookie, JWT_PRIVATE_KEY, generateToken } from '../utils.js'
+import { createHash, isValidPassword, extractCookie, generateToken } from '../utils.js'
 import { cartsModel } from "../dao/models/cart.model.js"
+import config from "./config.js"
+//variables entorno
+const adminUser= config.admin //cuenta de admin en archivo .env
+const JWT_PRIVATE_KEY= config.keyPrivateJWT
 
 
-const LocalStrategy = local.Strategy //estrategia local
-const JWTStrategy = passport_jwt.Strategy //estrategia jwt
-const ExtractJWT = passport_jwt.ExtractJwt //extrae token de cookie
+
+const LocalStrategy = local.Strategy        //estrategia local
+const JWTStrategy = passport_jwt.Strategy   //estrategia jwt
+const ExtractJWT = passport_jwt.ExtractJwt  //extrae token de cookie
 
 
 const initializePassport = () => {
@@ -41,7 +46,7 @@ const initializePassport = () => {
                 password: createHash(password),
                 file: req.file.filename, //file.filename(recibir archivo, y con su nombre original )
                 cart: cartForNewUser._id, //al nuevo usuario le asignamos el carrito que armamos mas arriba
-                role: (email === "adminCoder@coder.com") ? "admin" : "user"
+                role: (email === adminUser) ? "admin" : "user"
             }
             const result = await UserModel.create(newUser)
             return done(null, result)
