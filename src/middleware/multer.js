@@ -13,5 +13,8 @@ const storage= multer.diskStorage({ // acá le digo que se grabe en disco de alm
     }
 })
 
+
 export const uploader= multer({storage})
 
+// USARLO ASÍ ENTRE UNA RUTA Y SU FUNCION
+// uploader.single("file")

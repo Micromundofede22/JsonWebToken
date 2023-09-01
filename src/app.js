@@ -1,13 +1,16 @@
 import express from "express";
 import productRouter from "./routers/product.Router.js";
 import cartRouter from "./routers/cart.Router.js";
-import handlebars from "express-handlebars"
+import sessionRouter from "./routers/session.Router.js";
+import productsViewsRouter from "./routers/product.views.Router.js";
+import cartViewsRouter from "./routers/cart.views.Router.js";
+import sessionViewsRouter from "./routers/session.views.Router.js";
+// import mailRouter from "./routers/mail.Router.js";
+import routerChat from "./routers/chat.Router.js";
+import handlebars from "express-handlebars";
 import { Server } from "socket.io";
-import viewsRouter from "./routers/views.Router.js"
-import mongoose from "mongoose"
-import routerChat from "./routers/chat.Router.js"
-import sessionRouter from "./routers/session.Router.js"
-import { messagesModel } from "./dao/models/message.model.js";
+import mongoose from "mongoose";
+import { messagesModel } from "./models/message.model.js";
 import session from "express-session"; //DEPENDENCIA SESSION (guarda cookie)
 // import MongoStore from "connect-mongo"; //DEPENDENCIA guardar datos en MONGO
 import passport from "passport";
@@ -15,11 +18,13 @@ import initializePassport from "./config/passport.config.js";
 import { passportCall } from "./middleware/passportCall.js";
 import cookieParser from "cookie-parser"; //crea cookie (para jwt)
 import config from "./config/config.js"; //para leer variables de entorno
-import cors from "cors"
+import cors from "cors";
+import { handlePolicies } from "./middleware/auth.middleware.js";
+
 
 //variables de entorno
-const port= config.port
-const mongoUri= config.mongo_uri
+const port = config.port
+const mongoUri = config.mongo_uri
 
 const app = express()
 
@@ -55,13 +60,16 @@ initializePassport()
 app.use(passport.initialize())
 app.use(passport.session())
 
+app.get("/", (req, res) => { res.render("sessions/login") })
 
-app.use("/", sessionRouter) //ruta crea session
-app.use("/views", passportCall("jwt"), viewsRouter) //ruta html Onwire products y cart, con middleware passportCall (en la ) que hace ruta privada usando el token como capa de acceso. La estrategy "jwt" esta instanciada en passport config
-app.use("/chat", routerChat) //ruta html Onwire chat
-app.use('/api/products', productRouter) //ruta data Onwire
-app.use('/api/carts', cartRouter) //ruta data Onwire
-
+app.use("/api/session", sessionRouter)                                              //ruta crea session
+app.use('/api/products',passportCall("jwt"), productRouter)                                             //ruta data Onwire
+app.use('/api/carts', passportCall("jwt"), cartRouter)                                                  //ruta data Onwire
+app.use("/session", sessionViewsRouter)
+app.use("/products", passportCall("jwt"), productsViewsRouter)                      //ruta html Onwire products y cart, con middleware passportCall (en la ) que hace ruta privada usando el token como capa de acceso. La estrategy "jwt" esta instanciada en passport config
+app.use("/cart", passportCall("jwt"), cartViewsRouter)                               //ruta html Onwire products y cart, con middleware passportCall (en la ) que hace ruta privada usando el token como capa de acceso. La estrategy "jwt" esta instanciada en passport config
+app.use("/chat", passportCall("jwt"), handlePolicies("USER"), routerChat)             //ruta html Onwire chat
+// app.use("/mail", mailRouter)
 
 
 await mongoose.connect(mongoUri)
@@ -69,7 +77,7 @@ await mongoose.connect(mongoUri)
 const serverHTTP = app.listen(port, () => console.log(`Server up ${port}`)) //inica servidor http
 
 const io = new Server(serverHTTP) // instancia servidor socketio y enlaza al server http
-app.set("socketio", io) //creo objeto con el servidor io asi lo uso en toda la app
+app.set("socketio", io) //creo el objeto SOCKETIO con el servidor io asi lo uso en toda la app (lo uso para emitir en api/product en cada funcion del controller)
 
 
 io.on('connection', async (socket) => { //servidor escucha cuando llega una nueva conexion
@@ -85,9 +93,12 @@ io.on('connection', async (socket) => { //servidor escucha cuando llega una nuev
 
 
 
-// io.on("connection", socket =>{
-//     console.log("nuevo cliente")
-//     socket.on('products', data =>{
-//     io.emit('updateProducts',data)
-//     })
-// })
+io.on("connection", socket => {
+    console.log("nuevo cliente")
+    socket.on('products', data => {
+        io.emit('updateProducts', data)
+    })
+    socket.on('products', data => {
+        io.emit('updateCart', data)
+    })
+})

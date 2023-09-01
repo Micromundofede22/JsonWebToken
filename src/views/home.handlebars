@@ -17,7 +17,9 @@
         <div class="col-10 ">
             <h3>Bienvenido: {{user.first_name}}</h3>
             <h4>Rol: {{user.role}}</h4>
-            <a class="text-decoration-none text-reset" href="/logout"><strong>Cerrar sesión</strong> </a>
+             {{!-- <a class="navbar-brand btn btn-success text-white rounded-pill fw-bold mb-1" href="/cart/views/{{user.cart}}" id="cart">Cart</a> --}}
+             <a class="navbar-brand btn btn-success text-white rounded-pill fw-bold mb-1" href="/cart/cartrealtime/{{user.cart}}" id="cart">CartReal</a>
+            <a class="text-decoration-none text-reset" href="/api/session/logout"><strong>Cerrar sesión</strong> </a>
 
         </div>
 
@@ -40,7 +42,8 @@
             </tr>
         </thead>
         <tbody>
-            {{#each products.docs}}
+            {{!-- .docs porque paginate guarda los objetos en una propiedad docs --}}
+            {{#each products.docs}} 
             <tr>
                 <td>{{this.title}}</td>
                 <td>{{this.description}}</td>
@@ -58,18 +61,17 @@
     <div>
         <nav aria-label="Page navigation example row ">
             <ul class="pagination justify-content-center">
-                {{#if hasPrevPage}}
-                <li class="page-item"><a class="page-link bg-success text-white" href="{{prevLink}}">Previous</a></li>
+                {{#if products.hasPrevPage}}
+                <li class="page-item"><a class="page-link bg-success text-white" href="{{products.prevLink}}">Previous</a></li>
                 {{/if}}
-                {{#if hasNextPage}}
-                <li class="page-item"><a class="page-link bg-success text-white" href="{{nextLink}}">Next</a></li>
+                {{#if products.hasNextPage}}
+                <li class="page-item"><a class="page-link bg-success text-white" href="{{products.nextLink}}">Next</a></li>
                 {{/if}}
             </ul>
         </nav>
     </div>
 
 </div>
-
 
 
 

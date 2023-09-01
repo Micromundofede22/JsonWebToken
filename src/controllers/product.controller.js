@@ -1,34 +1,10 @@
-import { productModel } from "../dao/models/product.model.js";
+import { ProductService } from "../services/services.js";
 
-// busqueda por query
-export const readProductQueryController= async (req, res) => {
+// busqueda por query todos los productos
+export const getAllProductsController = async (req, res) => {
     try {
-        const limite = req.query.limite || 10
-        const page = req.query.page || 1
-        const sort = req.query.sort || 0
-        const status = req.query.status
-        const category = req.query.category
-
-
-        const result = await productModel.paginate(
-            (status && category) //filtros
-                ? { status: status, category: category }
-                : {}
-            ,
-
-            (limite || page && sort)
-                ? { limit: limite, page: page, sort: { price: Number(sort) } }
-                : {limit:limite, page:page}
-        )
-
-        result.prevLink = result.hasPrevPage
-            ? `/api/products?page=${result.prevPage}&limite=${limite}`
-            : ``;
-
-        result.nextLink = result.hasNextPage
-            ? `/api/products?page=${result.nextPage}&limite=${limite}`
-            : ``
-
+        // const result = await getProduct(req, res)
+        const result= await ProductService.getAllPaginate(req,res)
 
         res.status(200).json({
             status: "success",
@@ -43,23 +19,22 @@ export const readProductQueryController= async (req, res) => {
             nextLink: result.nextLink
         })
 
-        req.app.get('socketio').emit('updateProducts', await productModel.find().limit(limite))
     } catch (err) {
         res.status(500).json({ status: "error", error: err.message })
     }
 }
 
 // busqueda por params
-export const readProductParamsController= async (req, res) => {
+export const getProductByIdController = async (req, res) => {
     try {
         const id = req.params.pid
-        const result = await productModel.findById(id).lean().exec()
+        const result = await ProductService.getById(id)
 
         if (id === null || id < 0) {
             res.status(406).json({ status: "error", error: "Not found" })
         } else {
             res.status(200).json({ status: "success", payload: result })
-            req.app.get("socketio").emit("updateProducts", await productModel.find())
+            req.app.get("socketio").emit("updateProducts", await ProductService.getAll()) //socketio (servidor), emite un objeto updateProducts al cliente, cuyo socket escucha en el script de la vista realTime
         }
     } catch (err) {
         res.status(500).json({ status: "error", error: err.message })
@@ -67,29 +42,30 @@ export const readProductParamsController= async (req, res) => {
 }
 
 // crear productos
-export const createProductController= async (req, res) => {
+export const createProductController = async (req, res) => {
     try {
-        const product = req.body
-        const newProduct = await productModel.create(product)
-        res.status(201).json({ status: "success", payload: newProduct })
-        req.app.get("socketio").emit("updateProducts", await productModel.find())
+        const data = req.body
+        const result = await ProductService.create(data)
+        res.status(201).json({ status: "success", payload: result })
+        const updateProducts= await ProductService.getAll()
+        req.app.get("socketio").emit("updateProducts",updateProducts )
     } catch (err) {
         res.status(500).json({ status: "error", error: err.message })
     }
 }
 
 // ACTUALIZAR PRODUCTOS
-export const updateProductcontroller= async (req, res) => {
+export const updateProductController = async (req, res) => {
     try {
         const id = req.params.pid
-        const newData = req.body
-        const result = await productModel.findByIdAndUpdate(id, newData, { returnDocument: "after" })
+        const data = req.body
+        const result = await ProductService.update(id, data)
 
         if (result === null) {
             res.status(404).json({ status: "error", error: "Not found" })
         } else {
             res.status(200).json({ status: "success", payload: result })
-            req.app.get("socketio").emit("updateProducts", await productModel.find())
+            req.app.get("socketio").emit("updateProducts", await ProductService.getAll())
         }
     } catch (err) {
         res.status(500).json({ status: "error", error: err.message })
@@ -97,15 +73,15 @@ export const updateProductcontroller= async (req, res) => {
 }
 
 // ELIMINAR PRODUCTOS
-export const deleteProductController= async (req, res) => {
+export const deleteProductController = async (req, res) => {
     try {
         const id = req.params.pid
-        const result = await productModel.findByIdAndDelete(id)
+        const result = await ProductService.delete(id)
         if (result == null) {
             res.status(404).json({ status: "error", error: "Not found" })
         } else {
             res.status(200).json({ status: "success", payload: result })
-            req.app.get("socketio").emit("updateProducts", await productModel.find())
+            req.app.get("socketio").emit("updateProducts", await ProductService.getAll())
         }
     } catch (err) {
         res.status(500).json({ status: "error", error: err.message })

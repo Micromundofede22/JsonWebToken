@@ -1,16 +1,16 @@
 import passport from "passport" //traigo libreria
 import local from 'passport-local' //traigo estrategia de la libreria
-import UserModel from '../dao/models/user.model.js'
+import UserModel from '../models/user.model.js'
 import GitHubStrategy from "passport-github2"
 import { OAuth2Strategy as GoogleStrategy } from "passport-google-oauth"
 import passport_jwt from "passport-jwt"
 import { createHash, isValidPassword, extractCookie, generateToken } from '../utils.js'
-import { cartsModel } from "../dao/models/cart.model.js"
+import { cartsModel } from "../models/cart.model.js"
 import config from "./config.js"
+
 //variables entorno
 const adminUser= config.admin //cuenta de admin en archivo .env
 const JWT_PRIVATE_KEY= config.keyPrivateJWT
-
 
 
 const LocalStrategy = local.Strategy        //estrategia local
@@ -77,7 +77,7 @@ const initializePassport = () => {
     passport.use("github", new GitHubStrategy({
         clientID: "Iv1.d5fe56e994ba152a",
         clientSecret: "3ae4422147ceb4569eeec50d72d28d2a78a1e29a",
-        callbackURL: "http://localhost:8080/githubcallback"
+        callbackURL: "http://localhost:8080/api/session/githubcallback"
     }, async (accessToken, refreshToken, profile, done) => {
         // console.log(profile)
         try {
@@ -113,7 +113,7 @@ const initializePassport = () => {
     passport.use("googlePass", new GoogleStrategy({
         clientID: "677009444232-m39194megnhvte4295dih3j2hhjit2cf.apps.googleusercontent.com",
         clientSecret: "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",
-        callbackURL: "http://localhost:8080/googlecallback"
+        callbackURL: "http://localhost:8080/api/session/googlecallback"
     },
         async (accessToken, refreshToken, profile, done) => {
             try {
@@ -153,9 +153,9 @@ const initializePassport = () => {
     // esta estrategia se usa en un middleware asi: ruta, middleware("jwt"), router
     passport.use('jwt', new JWTStrategy({
         jwtFromRequest: ExtractJWT.fromExtractors([extractCookie]), //extractCookie importado de utils
-        secretOrKey: JWT_PRIVATE_KEY //constante de clave secreta importada de utils
+        secretOrKey: JWT_PRIVATE_KEY                                //constante de clave secreta importada de config .env
     }, async (jwt_payload, done) => {
-        done(null, jwt_payload)//devuelve contenido del jwt
+        done(null, jwt_payload)                                     //devuelve contenido del jwt
     }))
 
 

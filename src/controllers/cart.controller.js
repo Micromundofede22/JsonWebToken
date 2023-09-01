@@ -1,11 +1,13 @@
-import { cartsModel } from "../dao/models/cart.model.js"
+import { CartService, ProductService, TicketService, UserService } from "../services/services.js"
+import config from "../config/config.js"
 
 // Crear carrito
-export const createCartController= async (req, res) => {
+export const createCartController = async (req, res) => {
     try {
-        const newCart = req.body
-        const result= await cartsModel.create(newCart)
-        res.status(200).json({ status: "success", payload: result})
+
+        const data = req.body
+        const result = await CartService.createCart(data)
+        res.status(200).json({ status: "success", payload: result })
     } catch (err) {
         res.status(500).json({ status: "error", error: err.message })
     }
@@ -13,10 +15,11 @@ export const createCartController= async (req, res) => {
 
 
 // Trae carrito
-export const readCartController= async (req, res) => {
+export const getCartController = async (req, res) => {
     try {
         const id = req.params.cid
-        const result = await cartsModel.findById(id)
+        const result = await CartService.getByIdPopulate(id)
+
         if (id == null) {
             res.status(406).json({ status: "error", error: "Not found" })
         } else {
@@ -27,11 +30,12 @@ export const readCartController= async (req, res) => {
     }
 }
 
-export const createInCartController= async (req, res) => {
+//AGREGAR PRODUCTOS AL CARRITO
+export const createInCartController = async (req, res) => {
     try {
         const cid = req.params.cid;
         const pid = req.params.pid;
-        const cart = await cartsModel.findById(cid)
+        const cart = await CartService.getById(cid)
 
         let acum = 0
         cart.products.map((datos) => {
@@ -45,67 +49,138 @@ export const createInCartController= async (req, res) => {
             cart.products.push({ product: pid, quantity: 1 })
         }
 
-        await cartsModel.updateOne({ _id: cid }, cart) //1ero actualizo el carrito
-        const actualizado = await cartsModel.findById(cid).populate("products.product") //2do lo busco. Populateo la info de product en products para que aparezca en el carrito y asi se relacionen ambas bases de datos(cart y products)
-        res.status(200).json({ status: "success", payload: actualizado }) //3ero lo mando al json
+        await CartService.updateCart({ _id: cid }, cart) //1ero actualizo el carrito
+        const result = await CartService.getByIdPopulate(cid) //2do lo busco. Populateo la info de product en products para que aparezca en el carrito y asi se relacionen ambas bases de datos(cart y products)
+        res.status(200).json({ status: "success", payload: result }) //3ero lo mando al json
+        req.app.get("socketio").emit("updateCart", await CartService.getByIdPopulate(cid))
     } catch (err) {
-    res.status(500).json({ status: "error", error: err.message })
-}
-} 
-
-
-// ELIMINA UN PRODUCTO
-export const deleteOneProductController= async(req, res)=>{
-    try {
-        const cid= req.params.cid
-        const pid= req.params.pid
-        let cart= await cartsModel.findById(cid)
-        
-        const productIndex= cart.products.findIndex(item => item.product == pid)
-
-        cart.products.splice(productIndex, 1)
-        // console.log(cart)
-        await cartsModel.updateOne({_id: cid}, cart)
-
-        const result= await cartsModel.findById(cid).populate("products.product")
-
-        res.status(200).json({status: "success", payload: result})
-    } catch (err) {
-        res.status(500).json({ status: "error", error: err.message})
+        res.status(500).json({ status: "error", error: err.message })
     }
 }
 
-export const deleteCartController= async(req,res)=>{
+
+// ELIMINA UN PRODUCTO
+export const deleteOneProductController = async (req, res) => {
     try {
-        const cid= req.params.cid
-        await cartsModel.updateOne({_id: cid}, {products: []})
-        const result= await cartsModel.findById(cid).populate("products.product")
-        res.status(200).json({status: "success", payload:result})
+        const cid = req.params.cid
+        const pid = req.params.pid
+        let cart = await CartService.getById(cid)
+
+        const productIndex = cart.products.findIndex(item => item.product.toString() === pid) //busca indice del product a eliminar
+        if (productIndex >= 0) { //esto es por si findIndex no encuentra y tira -1.
+            cart.products.splice(productIndex, 1) //splice primer parámetro es el indice desde donde se elimina, 2do parametro cuantos elementos quiero eliminar
+            await CartService.updateCart({ _id: cid }, cart)
+        }
+
+        const result = await CartService.getByIdPopulate(cid)
+
+        res.status(200).json({ status: "success", payload: result })
+        req.app.get("socketio").emit("updateCart", await CartService.getByIdPopulate(cid))
     } catch (err) {
-        res.status(500).json({ status: "error", error: err.message})
+        res.status(500).json({ status: "error", error: err.message })
+    }
+}
+
+//ELIMINA TODOS PRODUCTOS
+export const deleteCartController = async (req, res) => {
+    try {
+        const cid = req.params.cid
+        await CartService.updateCart({ _id: cid }, { products: [] }) //array vacío
+        const result = await CartService.getByIdPopulate(cid)
+        res.status(200).json({ status: "success", payload: result })
+        req.app.get("socketio").emit("updateCart", await CartService.getByIdPopulate(cid))
+    } catch (err) {
+        res.status(500).json({ status: "error", error: err.message })
     }
 }
 
 // Actualizo cantidades de un producto
-export const updateQuantityController = async (req, res)=>{
+export const updateQuantityController = async (req, res) => {
     try {
-        const cid= req.params.cid
-        const pid= req.params.pid
-        const data= req.body
-        
-        const valor= data.quantity //extraigo el valor de quantity
-        const cart= await cartsModel.findById(cid)
-        cart.products.map((data)=>{
+        const cid = req.params.cid
+        const pid = req.params.pid
+        const data = req.body
+
+        const valor = data.quantity //extraigo el valor de quantity
+        const cart = await CartService.getById(cid)
+        cart.products.map((data) => {
             if (data.product == pid) {
                 data.quantity = valor
             }
         })
-      
-        await cartsModel.updateOne({_id: cid}, cart )
-        const result= await cartsModel.findById(cid).populate("products.product")
-        res.status(200).json({status: "success", payload: result})
+
+        await CartService.updateCart({ _id: cid }, cart)
+        const result = await CartService.getByIdPopulate(cid)
+        res.status(200).json({ status: "success", payload: result })
+        req.app.get("socketio").emit("updateCart", await CartService.getByIdPopulate(cid))
+    } catch (err) {
+        res.status(500).json({ status: "error", error: err.message })
+    }
+}
+
+//GENERA TICKET DE COMPRA
+
+export const purchaseController = async (req, res) => {
+    try {
+        const cid = req.params.cid
+        const cart = await CartService.getByIdPopulate(cid)
+
+        let montoTotal = []
+
+        const promises = cart.products.map(async (data) => {
+            let listProduct = await ProductService.getById((data.product._id).toString())    //traigo el product de la coleccion producto, ya q en cart solo hay referencias. toString()permite que se transforme a string porque esta en formato objeto
+            // console.log(listProduct)
+            //modifico stock de product
+            if (data.quantity <= listProduct.stock) {                                        //data es de cart y listproduct de coleccion productos
+                const quantity = listProduct.stock - data.quantity
+                listProduct.stock = quantity
+                await ProductService.update(listProduct._id, listProduct)                    //stock del producto modificado
+
+                //calculo monto de cada producto
+                const mount = (listProduct.price * data.quantity)
+                montoTotal.push(mount)
+
+                //eliminar products comprados del carrito
+                const index = cart.products.findIndex(item => item.product.toString() === listProduct._id.toString()) //busca indice del product a eliminar
+                if(index>= 0){
+                    cart.products.splice((index), 1)
+                await CartService.updateCart({ _id: (cart._id).toString() }, cart)
+                }
+                
+            }
+        })
+
+        //cuando todas las promesas anteriores se cumplan...
+        Promise.all(promises)
+            .then(async () => {
+                //DATA TICKET
+                //MONTO TOTAL
+                const sumaMount = montoTotal.reduce((acc, elem) => acc + elem, 0)
+
+                //EXTRAER EMAIL
+                const users = await UserService.getUser() //traigo usuarios
+                const user = users.filter((data) => data.cart == (cart._id).toString()) //filtro el usuario que tiene el carrito en cuestion
+                const email = user[0].email //entro al array que tiene mi user en la posicion 0, y luego a su propiedad email
+
+                //CODE AUTOINCREMENTAL
+                const tickets = await TicketService.getAll()
+                const code = tickets.length > 0
+                    ? Number(tickets[tickets.length - 1].code) + 1  //length es cantidad. al restarle 1, me deja en el indice final, y al code de ese objeto final le sumo 1
+                    : 1
+
+                //CREACIÓN TICKET
+                await TicketService.create({
+                    code: code.toString(),
+                    amount: sumaMount,
+                    purcharser: email
+                })
+                res.status(200).json({ status: "success", sinStock: cart.products }) //responder con el carrito con los productos sin stock
+                req.app.get("socketio").emit("updateCart", await CartService.getByIdPopulate(cid))
+            }).catch((err) => {
+                res.status(404).json({ status: "error en promesas iterables", error: err.message })
+            })
 
     } catch (err) {
-        res.status(500).json({ status: "error", error: err.message})
+        res.status(404).json({ status: "error", error: err.message })
     }
 }

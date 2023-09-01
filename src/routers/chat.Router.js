@@ -1,18 +1,10 @@
 import { Router } from "express";
-import { messagesModel } from "../dao/models/message.model.js";
+import { getMessageController } from "../controllers/message.controller.js";
+
 
 const router= Router()
 
 
-router.get("/", async(req, res)=>{
-    try {
-        const messages= await messagesModel.find()
-        res.render("chat", {messages})
-
-    } catch (err) {
-        res.status(500).json({status: "error", error: err.message})
-    }
-
-})
+router.get("/", getMessageController)
 
 export default router
