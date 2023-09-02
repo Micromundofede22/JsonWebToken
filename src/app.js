@@ -98,7 +98,7 @@ io.on("connection", socket => {
     socket.on('products', data => {
         io.emit('updateProducts', data)
     })
-    socket.on('products', data => {
+    socket.on('item', data => {
         io.emit('updateCart', data)
     })
 })

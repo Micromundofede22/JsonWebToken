@@ -16,6 +16,6 @@ export const productsViewsController = async (req, res) => {
 
 export const realTimeViewsController = async (req, res) => {
     const products = await ProductService.getAll()
-    console.log(products)
+    // console.log(products)
     res.render("realTimeProducts", { products });
 }

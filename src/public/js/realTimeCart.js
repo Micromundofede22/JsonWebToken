@@ -3,26 +3,35 @@ const socket = io() //del lado del cliente, a io le ponemos nombre socket
 const tableBody = document.getElementById("tabla");
 
 console.log("pasando por aca realTimeCart")
-socket.on("updateCart", (data) => { //cocket cuando escucha el updateProducts responde con esto
-    const dataenArray= [data]
-    const arrayIterable= dataenArray[0]
+socket.on("updateCart", (data) => { //socket cuando escucha el updateProducts responde con esto
+    const dataenArray = [data]
+    console.log("paso1")
+    const arrayIterable = dataenArray[0].products
     console.log(arrayIterable)
+
     tableBody.innerHTML = ` `
-    for (let product of data) {
-        console.log("paso")
-        const documentFragment= document.createDocumentFragment() //para que un elemento reciba varios appendchild
+    for (let item of arrayIterable) {
+        console.log("paso 2")
+        const documentFragment = document.createDocumentFragment() //para que un elemento reciba varios appendchild
+        const tdFragmentada = document.createDocumentFragment()
 
         let tr = document.createElement("tr")
         let td1 = document.createElement("td")
+        let td2 = document.createElement("td")
         let td3 = document.createElement("td")
         let td4 = document.createElement("td")
-        td1.innerHTML = `${product.title}`
-        td3.innerHTML = `${product.price}`
-        td4.innerHTML= `${product.thumbnails}`
+        let btn = document.createElement("button")
+        td1.innerHTML = `${item.product.title}`
+        td2.innerHTML = `${item.product.price}`
+        td3.innerHTML = `${item.product.thumbnails}`
+        btn.innerHTML = `Hola`
 
+        tdFragmentada.appendChild(td4)
         documentFragment.appendChild(tr) //mi fila tr es la fragmentada
-
-        tr.appendChild(td1,td3,td4) //le añado varios  appendchild
+        td4.appendChild(btn)
+        tr.appendChild(td1, td2, td3, td4)
+        
+        console.log(td1,td2,td3, td4)
 
         tableBody.appendChild(documentFragment) //luego a la tabla le añado el documento fragmentado (que es la fila tr)
     }

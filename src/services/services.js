@@ -10,7 +10,7 @@ import MessageRepositorie from "../repositories/message.repositorie.js"
 import MessageMongoDao from "../dao/message.mongo.DAO.js"
 
 
-export const ProductService= new ProductRepository(new ProductDAOFactory())
+export const ProductService= new ProductRepository(new ProductDAOFactory()) //DAO dinamico (mongo o file)
 
 export const CartService= new CartRepository(new CartMongoDAO())
 

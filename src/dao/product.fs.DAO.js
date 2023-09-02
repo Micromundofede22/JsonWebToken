@@ -1,3 +1,4 @@
+// NO ANDA, SOLO DEMOSTRACION PARA USAR EL FACTORY Y COMANDER
 import { ProductManager } from "./fsManager/ProductManager.js"
 
 const productManager= new ProductManager("./Productos.json")
