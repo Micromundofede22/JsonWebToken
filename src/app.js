@@ -63,18 +63,17 @@ app.use(passport.session())
 
 app.get("/", (req, res) => { res.render("sessions/login") })
 
-app.use("/api/session", sessionRouter)                                              //ruta crea session
-app.use('/api/products', productRouter)                                             //ruta data Onwire
-// app.use('/api/products',passportCall("jwt"), productRouter)                                             //ruta data Onwire
-app.use('/api/carts', passportCall("jwt"), cartRouter)                                                  //ruta data Onwire
-app.use("/session", sessionViewsRouter)
+app.use("/api/session", sessionRouter)                                              //ruta data Onwire session
+app.use('/api/products',passportCall("jwt"), productRouter)                         //ruta data Onwire                   
+app.use('/api/carts', passportCall("jwt"), cartRouter)                              //ruta data Onwire
+app.use("/session", sessionViewsRouter)                                             //ruta html Onwire de session
 app.use("/products", passportCall("jwt"), productsViewsRouter)                      //ruta html Onwire products y cart, con middleware passportCall (en la ) que hace ruta privada usando el token como capa de acceso. La estrategy "jwt" esta instanciada en passport config
-app.use("/cart", passportCall("jwt"), cartViewsRouter)                               //ruta html Onwire products y cart, con middleware passportCall (en la ) que hace ruta privada usando el token como capa de acceso. La estrategy "jwt" esta instanciada en passport config
-app.use("/chat", passportCall("jwt"), handlePolicies("USER"), routerChat)             //ruta html Onwire chat
-app.use("/mail", mailRouter)
+app.use("/cart", passportCall("jwt"), cartViewsRouter)                              //ruta html Onwire products y cart, con middleware passportCall (en la ) que hace ruta privada usando el token como capa de acceso. La estrategy "jwt" esta instanciada en passport config
+app.use("/chat", passportCall("jwt"), handlePolicies("USER"), routerChat)           //ruta html Onwire chat
 app.use("/mockingproducts", mockRouter)
+app.use("/mail", mailRouter)
 
-app.use(errorMiddleware)
+app.use(errorMiddleware)                                                             //middleware de errores siempre al final de endpoints
 
 
 await mongoose.connect(mongoUri)
