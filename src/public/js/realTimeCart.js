@@ -26,8 +26,8 @@ socket.on("updateCart", (data) => { //socket cuando escucha el updateProducts re
         td3.innerHTML = `${item.product.thumbnails}`
         btn.innerHTML = `Hola`
 
-        tdFragmentada.appendChild(td4)
         documentFragment.appendChild(tr) //mi fila tr es la fragmentada
+        tdFragmentada.appendChild(td4)
         td4.appendChild(btn)
         tr.appendChild(td1, td2, td3, td4)
         

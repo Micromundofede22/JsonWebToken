@@ -7,6 +7,6 @@ import {
 const router= Router()
 
 router.post("/user/signup", signupController) //email cuando se registra exitosamente user
-router.post("/product/getbill", getbillController)//email cuando se realiza la compra
+router.get("/product/getbill", getbillController)//email cuando se realiza la compra
 
 export default router

@@ -5,7 +5,8 @@ import sessionRouter from "./routers/session.Router.js";
 import productsViewsRouter from "./routers/product.views.Router.js";
 import cartViewsRouter from "./routers/cart.views.Router.js";
 import sessionViewsRouter from "./routers/session.views.Router.js";
-// import mailRouter from "./routers/mail.Router.js";
+import mailRouter from "./routers/mail.Router.js";
+import mockRouter from "./routers/mock.Router.js"
 import routerChat from "./routers/chat.Router.js";
 import handlebars from "express-handlebars";
 import { Server } from "socket.io";
@@ -20,7 +21,7 @@ import cookieParser from "cookie-parser"; //crea cookie (para jwt)
 import config from "./config/config.js"; //para leer variables de entorno
 import cors from "cors";
 import { handlePolicies } from "./middleware/auth.middleware.js";
-
+import errorMiddleware from "./middleware/error.middleware.js"
 
 //variables de entorno
 const port = config.port
@@ -63,13 +64,17 @@ app.use(passport.session())
 app.get("/", (req, res) => { res.render("sessions/login") })
 
 app.use("/api/session", sessionRouter)                                              //ruta crea session
-app.use('/api/products',passportCall("jwt"), productRouter)                                             //ruta data Onwire
+app.use('/api/products', productRouter)                                             //ruta data Onwire
+// app.use('/api/products',passportCall("jwt"), productRouter)                                             //ruta data Onwire
 app.use('/api/carts', passportCall("jwt"), cartRouter)                                                  //ruta data Onwire
 app.use("/session", sessionViewsRouter)
 app.use("/products", passportCall("jwt"), productsViewsRouter)                      //ruta html Onwire products y cart, con middleware passportCall (en la ) que hace ruta privada usando el token como capa de acceso. La estrategy "jwt" esta instanciada en passport config
 app.use("/cart", passportCall("jwt"), cartViewsRouter)                               //ruta html Onwire products y cart, con middleware passportCall (en la ) que hace ruta privada usando el token como capa de acceso. La estrategy "jwt" esta instanciada en passport config
 app.use("/chat", passportCall("jwt"), handlePolicies("USER"), routerChat)             //ruta html Onwire chat
-// app.use("/mail", mailRouter)
+app.use("/mail", mailRouter)
+app.use("/mockingproducts", mockRouter)
+
+app.use(errorMiddleware)
 
 
 await mongoose.connect(mongoUri)

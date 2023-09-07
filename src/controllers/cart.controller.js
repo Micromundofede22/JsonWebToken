@@ -1,5 +1,9 @@
 import { CartService, ProductService, TicketService, UserService } from "../services/services.js"
-import config from "../config/config.js"
+// testing errores
+import CustomError from "../services/errors/custom_error.js"; 
+import EErrors from "../services/errors/enums_error.js"; 
+import {cartNotFound} from "../services/errors/info_error.js"
+
 
 // Crear carrito
 export const createCartController = async (req, res) => {
@@ -20,8 +24,15 @@ export const getCartController = async (req, res) => {
         const id = req.params.cid
         const result = await CartService.getByIdPopulate(id)
 
+        // TESTING ERROR
         if (id == null) {
-            res.status(406).json({ status: "error", error: "Not found" })
+            CustomError.createError({
+                name: "Error. Carrito no existe",
+                cause: cartNotFound(id),
+                message: "Error al buscar carrito de compras",
+                code: EErrors.DB_ERROR
+            })
+            // res.status(406).json({ status: "error", error: "Not found" })
         } else {
             res.status(200).json({ status: "success", payload: result })
         }

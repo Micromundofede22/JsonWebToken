@@ -21,11 +21,11 @@
             {{#each cartProducts.products}}
             <tr>
                 {{!-- product.propiedad ya que cada producto es un objeto guardado en la propiedad product(asi esta en modelo)  --}}
-                <td id="td1">{{product.title}}</td>
-                <td id="td2">{{product.price}}</td>
-                <td id="td3">{{product.thumbnails}}</td>
+                <td id="td1">{{this.product.title}}</td>
+                <td id="td2">{{this.product.price}}</td>
+                <td id="td3">{{this.product.thumbnails}}</td>
                  {{!-- <td id="td4">{{this.quantity}}</td> --}}
-                <td id="td4"><button class="btn btn-danger" onclick="eliminateProduct(`{{product._id}}`)">❌</button></td>
+                <td id="td4"><button class="btn btn-danger" onclick="eliminateProduct(`{{this.product._id}}`)">❌</button></td>
             </tr>
             {{/each}}
             

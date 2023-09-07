@@ -2,7 +2,7 @@ const socket = io() //del lado del cliente, a io le ponemos nombre socket
 
 const tableBody = document.getElementById("tabla");
 
-console.log("pasando por aca 1 realTime")
+// console.log("pasando por aca 1 realTime")
 socket.on("updateProducts", (data) => { //cocket cuando escucha el updateProducts responde con esto
     tableBody.innerHTML = ` `
     for (products of data) {
