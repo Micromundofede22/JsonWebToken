@@ -61,7 +61,9 @@ initializePassport()
 app.use(passport.initialize())
 app.use(passport.session())
 
+
 app.get("/", (req, res) => { res.render("sessions/login") })
+
 
 app.use("/api/session", sessionRouter)                                              //ruta data Onwire session
 app.use('/api/products',passportCall("jwt"), productRouter)                         //ruta data Onwire                   

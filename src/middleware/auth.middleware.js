@@ -5,17 +5,19 @@ export const handlePolicies = policies => (req, res, next) => {
     if (policies.includes('ADMIN')) {
         if (user.role !== 'admin') {
             return res.status(403).render('errors/base', {
-                error: 'Need to be an ADMIN'
+                error: 'Acceso denegado. Necesita ser ADMIN'
             })
         }
     }
+
     if (policies.includes('USER')) {
         if (user.role !== 'user') {
             return res.status(403).render('errors/base', {
-                error: 'Need to be an user'
+                error: 'Acceso denegado. Necesita cuenta de user'
             })
         }
     }
+
     return next()
 }
 

@@ -19,6 +19,7 @@ export const cartNotFound= id =>{
     `
 }
 
+// caracteres inválidos
 export const characterNotAcceptable= id =>{
     return`
     El caracter ingresado (${id}), no es válido. 

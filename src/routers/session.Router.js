@@ -1,8 +1,6 @@
 import { Router } from "express";
 import passport from "passport";
 import { uploader } from "../middleware/multer.js";
-
-
 import {
     postLogin, 
     getFailLogin, 
@@ -20,7 +18,8 @@ import {
 const router = Router()
 
 // API para login
-router.post('/login', passport.authenticate('loginPass', { failureRedirect: '/api/session/failLogin' }),
+router.post('/login',
+passport.authenticate('loginPass', { failureRedirect: '/api/session/failLogin' }),
     postLogin
 )
 
