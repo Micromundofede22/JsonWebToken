@@ -1,8 +1,9 @@
 import { CartService, ProductService, TicketService, UserService } from "../services/services.js"
 // testing errores
-import CustomError from "../services/errors/custom_error.js"; 
-import EErrors from "../services/errors/enums_error.js"; 
-import {cartNotFound} from "../services/errors/info_error.js"
+import CustomError from "../services/errors/custom_error.js";
+import EErrors from "../services/errors/enums_error.js";
+import { cartNotFound } from "../services/errors/info_error.js"
+import logger from "../loggers.js";
 
 
 // Crear carrito
@@ -19,7 +20,7 @@ export const createCartController = async (req, res) => {
 
 
 // Trae carrito
-export const getCartController = async (req, res) => {
+export const getCartController = async (req, res, next) => {
     try {
         const id = req.params.cid
         const result = await CartService.getByIdPopulate(id)
@@ -35,9 +36,10 @@ export const getCartController = async (req, res) => {
             // res.status(406).json({ status: "error", error: "Not found" })
         } else {
             res.status(200).json({ status: "success", payload: result })
+
         }
-    } catch (err) {
-        res.status(500).json({ status: "error", error: err.message })
+    } catch (error) {
+        next(error)
     }
 }
 
@@ -141,7 +143,7 @@ export const purchaseController = async (req, res) => {
         const promises = cart.products.map(async (data) => {
             let listProduct = await ProductService.getById((data.product._id).toString())    //traigo el product de la coleccion producto, ya q en cart solo hay referencias. toString()permite que se transforme a string porque esta en formato objeto
             // console.log(listProduct)
-            //modifico stock de product
+            //modifico stock de product en coleccion productos
             if (data.quantity <= listProduct.stock) {                                        //data es de cart y listproduct de coleccion productos
                 const quantity = listProduct.stock - data.quantity
                 listProduct.stock = quantity
@@ -153,11 +155,11 @@ export const purchaseController = async (req, res) => {
 
                 //eliminar products comprados del carrito
                 const index = cart.products.findIndex(item => item.product.toString() === listProduct._id.toString()) //busca indice del product a eliminar
-                if(index>= 0){
+                if (index >= 0) { //mayor a 0, por si findIndex no encuentra el producto, tira -1 y me rompe el codigo
                     cart.products.splice((index), 1)
-                await CartService.updateCart({ _id: (cart._id).toString() }, cart)
+                    await CartService.updateCart({ _id: (cart._id).toString() }, cart) //solo quedan los productos que no tienen stock
                 }
-                
+
             }
         })
 
@@ -186,12 +188,15 @@ export const purchaseController = async (req, res) => {
                     purcharser: email
                 })
                 res.status(200).json({ status: "success", sinStock: cart.products }) //responder con el carrito con los productos sin stock
+                logger.info("success")
                 req.app.get("socketio").emit("updateCart", await CartService.getByIdPopulate(cid))
             }).catch((err) => {
                 res.status(404).json({ status: "error en promesas iterables", error: err.message })
+                logger.error(err.message)
             })
 
     } catch (err) {
         res.status(404).json({ status: "error", error: err.message })
+        logger.error(err.message)
     }
 }

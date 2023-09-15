@@ -5,10 +5,11 @@ import UserDTO from "../dto/Users.DTO.js";
 
 //variable de entorno en carpeta config, archivo config
 const JWT_COOKIE_NAME = config.cookieNameJWT
+const JWT_PRIVATE_KEY = config.keyPrivateJWT
 
 
 export const postLogin= async (req, res) => {
-    res.cookie(JWT_COOKIE_NAME, req.user.token, signedCookie("clavesecreta")).redirect('/products/views') //en la cookie guardo el token. signedcockie es la cookie firmada
+    res.cookie(JWT_COOKIE_NAME, req.user.token, signedCookie(JWT_PRIVATE_KEY)).redirect('/products/views') //en la cookie guardo el token. signedcockie es la cookie firmada
 }
 
 export const getFailLogin= (req, res) => {
@@ -27,14 +28,14 @@ export const getGitHub= async (req, res) => { }
 
 export const gitHubCallback= async (req, res) => {
     // console.log('Callback: ', req.user)
-    res.cookie(JWT_COOKIE_NAME, req.user.token,signedCookie("clavesecreta")).redirect('/products/views') //a la coockie le meto el token que esta dentro del user
+    res.cookie(JWT_COOKIE_NAME, req.user.token,signedCookie(JWT_PRIVATE_KEY)).redirect('/products/views') //a la coockie le meto el token que esta dentro del user
 }
 
 export const getGoogle=  async (req, res) => { }
 
 export const googleCallback=  async (req, res) => {
     // console.log('Callback: ', req.user)
-    res.cookie(JWT_COOKIE_NAME, req.user.token, signedCookie("clavesecreta")).redirect('/products/views') //a la cookie le meto el token
+    res.cookie(JWT_COOKIE_NAME, req.user.token, signedCookie(JWT_PRIVATE_KEY)).redirect('/products/views') //a la cookie le meto el token
 }
 
 export const getLogout= (req, res) => {

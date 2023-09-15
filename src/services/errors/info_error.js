@@ -19,9 +19,22 @@ export const cartNotFound= id =>{
     `
 }
 
+// producto no existe en la base de datos
+export const productNotFound= id =>{
+    return `
+    El producto con id (${id}) no se encuentra en nuestra base de datos
+    `
+}
+
 // caracteres inválidos
 export const characterNotAcceptable= id =>{
     return`
     El caracter ingresado (${id}), no es válido. 
+    `
+}
+
+export const informationNotFound= ()=> {
+    return `
+    Los mensajes no se encuentran disponibles en nuestra base de datos
     `
 }

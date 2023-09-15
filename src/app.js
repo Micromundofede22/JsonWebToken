@@ -8,6 +8,7 @@ import sessionViewsRouter from "./routers/session.views.Router.js";
 import mailRouter from "./routers/mail.Router.js";
 import mockRouter from "./routers/mock.Router.js"
 import routerChat from "./routers/chat.Router.js";
+import loggerRouter from "./routers/logger.Router.js"
 import handlebars from "express-handlebars";
 import { Server } from "socket.io";
 import mongoose from "mongoose";
@@ -22,6 +23,7 @@ import config from "./config/config.js"; //para leer variables de entorno
 import cors from "cors";
 import { handlePolicies } from "./middleware/auth.middleware.js";
 import errorMiddleware from "./middleware/error.middleware.js"
+import logger from "./loggers.js";
 
 //variables de entorno
 const port = config.port
@@ -72,7 +74,8 @@ app.use("/session", sessionViewsRouter)                                         
 app.use("/products", passportCall("jwt"), productsViewsRouter)                      //ruta html Onwire products y cart, con middleware passportCall (en la ) que hace ruta privada usando el token como capa de acceso. La estrategy "jwt" esta instanciada en passport config
 app.use("/cart", passportCall("jwt"), cartViewsRouter)                              //ruta html Onwire products y cart, con middleware passportCall (en la ) que hace ruta privada usando el token como capa de acceso. La estrategy "jwt" esta instanciada en passport config
 app.use("/chat", passportCall("jwt"), handlePolicies("USER"), routerChat)           //ruta html Onwire chat
-app.use("/mockingproducts", mockRouter)
+app.use("/mockingproducts", mockRouter)                                             //ruta prueba del servidor 
+app.use("/loggerTest", loggerRouter)
 app.use("/mail", mailRouter)
 
 app.use(errorMiddleware)                                                             //middleware de errores siempre al final de endpoints
@@ -80,7 +83,7 @@ app.use(errorMiddleware)                                                        
 
 await mongoose.connect(mongoUri)
 
-const serverHTTP = app.listen(port, () => console.log(`Server up ${port}`)) //inica servidor http
+const serverHTTP = app.listen(port, () => logger.info(`Server up ${port}`)) //inica servidor http
 
 const io = new Server(serverHTTP) // instancia servidor socketio y enlaza al server http
 app.set("socketio", io) //creo el objeto SOCKETIO con el servidor io asi lo uso en toda la app (lo uso para emitir en api/product en cada funcion del controller)

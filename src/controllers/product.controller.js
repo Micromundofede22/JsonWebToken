@@ -4,8 +4,10 @@ import CustomError from "../services/errors/custom_error.js"; //clase que crea e
 import EErrors from "../services/errors/enums_error.js"; //diccionario errores
 import {
     generateProductsErrorInfo, 
-    characterNotAcceptable
+    characterNotAcceptable,
+    productNotFound
 } from "../services/errors/info_error.js" //info de errores al generar products
+import logger from "../loggers.js";
 
 
 
@@ -49,6 +51,7 @@ export const getProductByIdController = async (req, res, next) => {
             
         } else {
             res.status(200).json({ status: "success", payload: result })
+            logger.info("success")
             req.app.get("socketio").emit("updateProducts", await ProductService.getAll()) //socketio (servidor), emite un objeto updateProducts al cliente, cuyo socket escucha en el script de la vista realTime
         }
     } catch (error) {
@@ -73,6 +76,8 @@ export const createProductController = async (req, res, next) => { //next, para 
 
         const result = await ProductService.create(data)
         res.status(201).json({ status: "success", payload: result })
+        logger.info("success")
+        // SOKETIO
         const updateProducts= await ProductService.getAll()
         req.app.get("socketio").emit("updateProducts",updateProducts )
     } catch (error) {
@@ -100,17 +105,22 @@ export const updateProductController = async (req, res) => {
 }
 
 // ELIMINAR PRODUCTOS
-export const deleteProductController = async (req, res) => {
+export const deleteProductController = async (req, res, next) => {
     try {
         const id = req.params.pid
         const result = await ProductService.delete(id)
         if (result == null) {
-            res.status(404).json({ status: "error", error: "Not found" })
+            CustomError.createError({                   
+                name: "Error de búsqueda",       
+                cause: productNotFound(id), 
+                message: "No se ha eliminado el producto",  
+                code: EErrors.DB_ERROR      
+            })
         } else {
             res.status(200).json({ status: "success", payload: result })
             req.app.get("socketio").emit("updateProducts", await ProductService.getAll())
         }
-    } catch (err) {
-        res.status(500).json({ status: "error", error: err.message })
+    } catch (error) {
+        next(error)
     }
 }

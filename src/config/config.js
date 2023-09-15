@@ -10,9 +10,10 @@ program.option("-p <persistence>", "persistencia de los datos", "MONGO")
 
 program.parse()
 const persistenceComander= program.opts().p
-console.log(persistenceComander)
+// console.log(persistenceComander)
 
 export default{
+    environment: process.env.ENVIRONMENT,
     port:process.env.PORT,                            //PUERTO listening
     mongo_uri: process.env.MONGO_URI,                 //URL CONEXIÓN BASE DATOS
     persistence: persistenceComander,                  
