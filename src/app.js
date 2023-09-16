@@ -24,6 +24,8 @@ import cors from "cors";
 import { handlePolicies } from "./middleware/auth.middleware.js";
 import errorMiddleware from "./middleware/error.middleware.js"
 import logger from "./loggers.js";
+// import clusterRouter from "./routers/cluster.Router.js"
+
 
 //variables de entorno
 const port = config.port
@@ -77,6 +79,7 @@ app.use("/chat", passportCall("jwt"), handlePolicies("USER"), routerChat)       
 app.use("/mockingproducts", mockRouter)                                             //ruta prueba del servidor 
 app.use("/loggerTest", loggerRouter)
 app.use("/mail", mailRouter)
+// app.use("/cluster", clusterRouter)
 
 app.use(errorMiddleware)                                                             //middleware de errores siempre al final de endpoints
 

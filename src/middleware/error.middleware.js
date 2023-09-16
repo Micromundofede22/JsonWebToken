@@ -8,12 +8,12 @@ export default(error, req, res, next) => {
         case EErrors.INVALID_TYPES_ERROR:
             res.status(400).json({ status: 'error', error: error.name, cause: error.cause })
 
-            logger.error({error: error.name, cause: error.cause })
+            logger.error(error.cause, error.name )
             break
 
         case EErrors.DB_ERROR:
             res.status(404).json({status: "error", error: error.name, cause: error.cause})
-            logger.error({error: error.name, cause: error.cause }) //en logger formato simple no, ya que le mando formato json acá.
+            logger.error(error.cause ) 
             
         default:
             res.status(500).json({ status: 'error', error: 'Unhandled error' })
