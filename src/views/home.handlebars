@@ -17,8 +17,10 @@
         <div class="col-10 ">
             <h3>Bienvenido: {{user.first_name}}</h3>
             <h4>Rol: {{user.role}}</h4>
-             {{!-- <a class="navbar-brand btn btn-success text-white rounded-pill fw-bold mb-1" href="/cart/views/{{user.cart}}" id="cart">Cart</a> --}}
+             <a class="navbar-brand btn btn-success text-white rounded-pill fw-bold mb-1" href="/cart/views/{{user.cart}}" id="cart">Cart</a>
              <a class="navbar-brand btn btn-success text-white rounded-pill fw-bold mb-1" href="/cart/cartrealtime/{{user.cart}}" id="cart">CartReal</a>
+             <a class="navbar-brand btn btn-success text-white rounded-pill fw-bold mb-1" href="/api/session/current">User</a>
+
             <a class="text-decoration-none text-reset" href="/api/session/logout"><strong>Cerrar sesión</strong> </a>
 
         </div>

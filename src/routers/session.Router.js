@@ -1,5 +1,6 @@
 import { Router } from "express";
 import passport from "passport";
+import { passportCall } from "../middleware/passportCall.js";
 import { uploader } from "../middleware/multer.js";
 import {
     postLogin, 
@@ -11,7 +12,8 @@ import {
     getGoogle,
     googleCallback,
     getLogout,
-    getCurrent
+    getCurrent,
+    cargaImage
 } from "../controllers/session.controller.js"
 
 
@@ -28,12 +30,8 @@ router.get('/failLogin', getFailLogin)
 
 // API register en DB
 router.post('/register',
-    uploader.single("file"),//uploader.single("file") es el middleware de MULTER para subir fotos. "file, porque en el formulario el name es file"
-    passport.authenticate('registerPass', {
-        failureRedirect: '/failRegister' //si no registra, que redirija a fail 
-    }), 
-    postRegister
-    )
+    passport.authenticate('registerPass', {failureRedirect: '/api/session/failRegister'}), postRegister) //si no registra, que redirija a fail 
+
 
 router.get('/failRegister', getFailRegister)
 
@@ -75,5 +73,11 @@ router.get('/logout', getLogout)
 //datos cliente
 router.get("/current", getCurrent)
 
+//actualizar foto perfil
+router.post("/current/cargaimage",
+uploader.single("file"), //uploader.single("file") es el middleware de MULTER para subir fotos. "file, porque en el formulario el name es file"
+passportCall("jwt"),
+    cargaImage
+)
 
 export default router

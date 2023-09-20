@@ -3,7 +3,7 @@ const socket = io() //del lado del cliente, a io le ponemos nombre socket
 const tableBody = document.getElementById("tabla");
 
 console.log("pasando por aca realTimeCart")
-socket.on("updateCart", (data) => { //socket cuando escucha el updateProducts responde con esto
+socket.on("updateCart", (data) => { //socket cuando escucha el updateCart responde con esto
     const dataenArray = [data]
     console.log("paso1")
     const arrayIterable = dataenArray[0].products
@@ -24,7 +24,8 @@ socket.on("updateCart", (data) => { //socket cuando escucha el updateProducts re
         td1.innerHTML = `${item.product.title}`
         td2.innerHTML = `${item.product.price}`
         td3.innerHTML = `${item.product.thumbnails}`
-        btn.innerHTML = `Hola`
+        btn.innerHTML= `hola `
+    
 
         documentFragment.appendChild(tr) //mi fila tr es la fragmentada
         tdFragmentada.appendChild(td4)

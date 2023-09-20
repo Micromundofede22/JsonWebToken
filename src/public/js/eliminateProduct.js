@@ -3,7 +3,6 @@ const hrefValue = cartLink?.getAttribute("href"); //getAtribute devuelve el valu
 const cart = hrefValue?.match(/\/cart\/views\/(.+)/)[1] //match busca coincidencias y devuelve un array con la coincidencia. \/esto borra lo que no me interesa que busque
 
 
-
 const eliminateProduct = async (_id) => {
     try {
         const res = await fetch(`/api/carts/${cart}/product/${_id}`, {
@@ -17,3 +16,4 @@ const eliminateProduct = async (_id) => {
         console.log(error)
     }
 }
+

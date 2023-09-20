@@ -88,8 +88,9 @@ await mongoose.connect(mongoUri)
 
 const serverHTTP = app.listen(port, () => logger.info(`Server up ${port}`)) //inica servidor http
 
+//CONFIGURACION SOCKET IO
 const io = new Server(serverHTTP) // instancia servidor socketio y enlaza al server http
-app.set("socketio", io) //creo el objeto SOCKETIO con el servidor io asi lo uso en toda la app (lo uso para emitir en api/product en cada funcion del controller)
+app.set("socketio", io) //creo el objeto SOCKETIO con el servidor io asi lo uso en toda la app (lo uso para emitir en api/product Y api/cart en cada funcion del controller)
 
 
 io.on('connection', async (socket) => { //servidor escucha cuando llega una nueva conexion
@@ -102,8 +103,6 @@ io.on('connection', async (socket) => { //servidor escucha cuando llega una nuev
         io.emit('logs', messages) // y el servidor io emite a todos el historial completo
     })
 })
-
-
 
 io.on("connection", socket => {
     console.log("nuevo cliente")

@@ -33,7 +33,6 @@ const initializePassport = () => {
             if (user) {
                 console.log('Usuario ya existe')
                 return done(null, false)
-
             }
             // SI NO EXISTE USUARIO, SE REGISTRA UNO NUEVO
             const cartForNewUser = await cartsModel.create({}) //creamos un CARRITO
@@ -44,7 +43,8 @@ const initializePassport = () => {
                 age,
                 servicio: "local",
                 password: createHash(password),
-                file: req.file.filename, //file.filename(recibir archivo, y con su nombre original )
+                // file: req.file.filename, //file.filename(recibir archivo, y con su nombre original )
+                file: "usuario.jpg",
                 cart: cartForNewUser._id, //al nuevo usuario le asignamos el carrito que armamos mas arriba
                 role: (email === adminUser) ? "admin" : "user"
             }
@@ -101,7 +101,6 @@ const initializePassport = () => {
                 })
                 const token = generateToken(newUser)
                 newUser.token = token
-
                 return done(null, newUser)
             }
         } catch (err) {

@@ -25,7 +25,7 @@
                 <td id="td2">{{this.product.price}}</td>
                 <td id="td3">{{this.product.thumbnails}}</td>
                  {{!-- <td id="td4">{{this.quantity}}</td> --}}
-                <td id="td4"><button class="btn btn-danger" onclick="eliminateProduct(`{{this.product._id}}`)">❌</button></td>
+                <td id="td4"><button id="btn" class="btn btn-danger" onclick="eliminateProduct(`{{this.product._id}}`)">❌</button></td>
             </tr>
             {{/each}}
             
@@ -33,5 +33,5 @@
     </table>
 
 <script src="/socket.io/socket.io.js"></script>
-<script src="/js/realTimeCart.js"></script>
 <script src="/js/eliminateProduct.js"></script>
+<script src="/js/realTimeCart.js"></script>
