@@ -7,7 +7,7 @@ import {
 const productsViewsRouter = Router()
 
 
-productsViewsRouter.get("/views", productsViewsController)            //vista productos
+productsViewsRouter.get("/views", productsViewsController)              //vista productos
 productsViewsRouter.get("/realtimeproducts", realTimeViewsController);  //vista RealTime Productos
 
 

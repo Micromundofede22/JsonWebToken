@@ -1,5 +1,5 @@
 import multer from "multer";
-import logger from "../loggers.js";
+// import logger from "../loggers.js";
 
 // CONFIGURACIÓN MULTER
 const storage= multer.diskStorage({ // acá le digo que se grabe en disco de almacenamiento

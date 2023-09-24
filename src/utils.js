@@ -23,6 +23,15 @@ export const generateToken = user => {
     return token
 }
 
+export const generateRandomString= (num)=>{
+    return [...Array(num)].map(()=>{
+        const randomNum= ~~(Math.random()* 36)
+        return randomNum.toString(36)
+    })
+    .join("")
+    .toUpperCase()
+}
+
 
 // extraer token de cookie (se usa en la estrategy de JWT en passport config)
 export const extractCookie = req => {

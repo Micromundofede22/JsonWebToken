@@ -8,6 +8,7 @@ import { createHash, isValidPassword, extractCookie, generateToken } from '../ut
 import { cartsModel } from "../models/cart.model.js"
 import config from "./config.js"
 
+
 //variables entorno
 const adminUser= config.admin //cuenta de admin en archivo .env
 const JWT_PRIVATE_KEY= config.keyPrivateJWT
@@ -24,7 +25,7 @@ const initializePassport = () => {
     passport.use('registerPass', new LocalStrategy({
         passReqToCallback: true,
         usernameField: 'email'
-    }, async (req, username, password, done) => {
+    }, async (req, res, username, password, done) => {
         const { first_name, last_name, email, age } = req.body
 
         try {
@@ -43,13 +44,16 @@ const initializePassport = () => {
                 age,
                 servicio: "local",
                 password: createHash(password),
-                // file: req.file.filename, //file.filename(recibir archivo, y con su nombre original )
                 file: "usuario.jpg",
                 cart: cartForNewUser._id, //al nuevo usuario le asignamos el carrito que armamos mas arriba
                 role: (email === adminUser) ? "admin" : "user"
             }
+            
             const result = await UserModel.create(newUser)
+            // const token = generateToken(newUser)
+            //     newUser.token = token
             return done(null, result)
+            
         } catch (err) {
 
         }

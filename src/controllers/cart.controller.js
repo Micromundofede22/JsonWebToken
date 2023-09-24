@@ -187,9 +187,12 @@ export const purchaseController = async (req, res) => {
                     amount: sumaMount,
                     purcharser: email
                 })
-                res.status(200).json({ status: "success", sinStock: cart.products }) //responder con el carrito con los productos sin stock
+                // res.status(200).json({ status: "success", sinStock: cart.products }) //responder con el carrito con los productos sin stock
+                res.redirect(`/mail/product/getbill/${code}`)
+
                 logger.info("success")
                 req.app.get("socketio").emit("updateCart", await CartService.getByIdPopulate(cid))
+
             }).catch((err) => {
                 res.status(404).json({ status: "error en promesas iterables", error: err.message })
                 logger.error(err.message)

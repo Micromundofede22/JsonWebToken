@@ -1,12 +1,19 @@
 import { signedCookie } from "cookie-parser";
 import config from "../config/config.js";
 import UserDTO from "../dto/Users.DTO.js"; 
-import { UserService } from "../services/services.js";
+import { UserPasswordService, UserService } from "../services/services.js";
+import { createHash, generateRandomString } from "../utils.js";
+import nodemailer from "nodemailer";//mail
+
+
+
 
 //variable de entorno en carpeta config, archivo config
 const JWT_COOKIE_NAME = config.cookieNameJWT
 const JWT_PRIVATE_KEY = config.keyPrivateJWT
-
+// mail
+const nodemailerUSER = config.nodemailerUSER
+const nodemailerPASS = config.nodemailerPASS
 
 export const postLogin= async (req, res) => {
     res.cookie(JWT_COOKIE_NAME, req.user.token, signedCookie(JWT_PRIVATE_KEY)).redirect('/products/views') //en la cookie guardo el token. signedcockie es la cookie firmada
@@ -58,7 +65,7 @@ export const cargaImage= async (req, res)=> {
         console.log(data.filename)
 
         const result = await UserService.updateUser(id,{file: data.filename})
-        console.log(result)
+        // console.log(result)
 
         if (result === null) {
             res.status(404).json({ status: "error", error: "Not found" })
@@ -68,5 +75,67 @@ export const cargaImage= async (req, res)=> {
         }
     }catch(err){
         res.status(404).json({status: "error", message: err.message})
+    }
+}
+
+
+export const postOlvidar = async (req,res)=>{
+    const email= req.body.email
+    const user= await UserService.getUserEmail({email})
+    // console.log(user)
+    if(!user){
+        res.status(404).json({status: "error", error: "Usuario no registrado"})
+    }
+    const token= generateRandomString(16)
+    await UserPasswordService.create({email, token})
+
+    //config email
+    let configNodemailer = {
+        service: "gmail",
+        auth: {
+            user: nodemailerUSER,
+            pass: nodemailerPASS
+        }
+    }
+    let transporter = nodemailer.createTransport(configNodemailer)
+    
+    let message = {
+        from: nodemailerUSER,
+        to: email,
+        subject: "Restablecer contraseña ",
+        html: `<h1>Restablece tu contraseña</h1><hr /> Haz click en el siguiente enlace:
+          <a href="http://localhost:8080/api/session/verify-token/${token}">Click Aquí</a>`
+    }
+    try{
+        await transporter.sendMail(message)
+        res.status(200).json({status: "success", message:
+        `El link para reestablecer la contraseña fue enviado al mail ${email}. Caduca en 1 hora.` })
+    }catch(err){
+        res.status(400).json({status: "error", error: err.message})
+    }
+}
+
+
+export const verifyToken= async(req,res) =>{
+    try{
+        const userPassword= await UserPasswordService.getUserPassword({token: req.params.token})
+        if(!userPassword){
+           return res.status(400).json({status: "error", error: "Token no válido // Token expiró"}) 
+        }
+        const user=  userPassword.email
+        res.render("sessions/resetContra", {user})
+    }catch(err){
+        res.status(400).json({status:"error", error:err.message})
+    }
+}
+
+export const restablecerContra= async(req,res)=>{
+    try{
+        const user= await UserService.getUserEmail({email: req.params.user})                  //busco un usuario por su email
+        await UserService.updateUser(user._id, {password: createHash(req.body.newPassword)} ) //luego modifico su contraseña
+        res.status(200).json({status:"success", message: "Contraseña creada con éxito"})
+        await UserPasswordService.delete({email: req.params.user})                            //elimino el token de cambio de contraseña
+    }catch(err){
+        res.status(400).json({status: "error", error:err.message})
     }
 }

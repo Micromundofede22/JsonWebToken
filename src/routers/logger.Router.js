@@ -11,6 +11,8 @@ router.get("/", (req,res)=>{
     logger.warning("WARNING")
     logger.error("ERROR")
     logger.fatal("FATAL")
+
+    res.status(404).json({status: "error", error: err})
 })
 
 export default router

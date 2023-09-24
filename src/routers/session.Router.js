@@ -2,10 +2,11 @@ import { Router } from "express";
 import passport from "passport";
 import { passportCall } from "../middleware/passportCall.js";
 import { uploader } from "../middleware/multer.js";
+// import { signUpMail } from "../controllers/mail.controller.js"
 import {
-    postLogin, 
-    getFailLogin, 
-    postRegister, 
+    postLogin,
+    getFailLogin,
+    postRegister,
     getFailRegister,
     getGitHub,
     gitHubCallback,
@@ -13,7 +14,10 @@ import {
     googleCallback,
     getLogout,
     getCurrent,
-    cargaImage
+    cargaImage,
+    postOlvidar,
+    verifyToken,
+    restablecerContra
 } from "../controllers/session.controller.js"
 
 
@@ -21,7 +25,7 @@ const router = Router()
 
 // API para login
 router.post('/login',
-passport.authenticate('loginPass', { failureRedirect: '/api/session/failLogin' }),
+    passport.authenticate('loginPass', { failureRedirect: '/api/session/failLogin' }),
     postLogin
 )
 
@@ -30,7 +34,9 @@ router.get('/failLogin', getFailLogin)
 
 // API register en DB
 router.post('/register',
-    passport.authenticate('registerPass', {failureRedirect: '/api/session/failRegister'}), postRegister) //si no registra, que redirija a fail 
+    passport.authenticate('registerPass', { failureRedirect: '/api/session/failRegister' }),
+    // signUpMail(),
+    postRegister) //si no registra, que redirija a fail 
 
 
 router.get('/failRegister', getFailRegister)
@@ -64,7 +70,7 @@ router.get("/google",
 router.get("/googlecallback",
     passport.authenticate("googlePass", { failureRedirect: '/api/session/failLogin' }),
     googleCallback
-   )
+)
 
 
 // Cerrar Session
@@ -75,9 +81,16 @@ router.get("/current", getCurrent)
 
 //actualizar foto perfil
 router.post("/current/cargaimage",
-uploader.single("file"), //uploader.single("file") es el middleware de MULTER para subir fotos. "file, porque en el formulario el name es file"
-passportCall("jwt"),
+    uploader.single("file"), //uploader.single("file") es el middleware de MULTER para subir fotos. "file, porque en el formulario el name es file"
+    passportCall("jwt"),
     cargaImage
 )
+
+//recuperar contraseña
+router.post("/olvidar-contra", postOlvidar)
+//verificar token mandado al mail
+router.get("/verify-token/:token", verifyToken)
+//restablecer contraseña
+router.post("/restablecer-contra/:user", restablecerContra )
 
 export default router

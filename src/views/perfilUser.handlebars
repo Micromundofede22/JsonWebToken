@@ -19,17 +19,37 @@
             <h4>Email: {{user.email}}</h4>
         </div>
 
-        <form class="col-5" action="/api/session/current/cargaimage" method="post" enctype="multipart/form-data">
 
+        {{#if (igual user.servicio "local" )}}
+        <form class="col-5" action="/api/session/current/cargaimage" method="post" enctype="multipart/form-data">
             <div class="mb-3">
                 <h6>Cambiar foto de perfil</h6><input type="file" name="file">
             </div>
             <button type="submit" class="btn btn-success">Actualizar</button>
         </form>
 
+
+          {{else if (igual user.servicio "Google" )}}
+        <form class="col-5" action="/api/session/current/cargaimage" method="post" enctype="multipart/form-data">
+            <div class="mb-3">
+                <h6>Cambiar foto de perfil</h6><input disabled="true" type="file" name="file">
+            </div>
+            <button type="submit" disabled="true" class="btn btn-success">Actualizar</button>
+        </form>
+
+
+          {{else if (igual user.servicio "GitHub" )}}
+        <form class="col-5" action="/api/session/current/cargaimage" method="post" enctype="multipart/form-data">
+            <div class="mb-3">
+                <h6>Cambiar foto de perfil</h6><input disabled="true" type="file" name="file">
+            </div>
+            <button type="submit" disabled="true" class="btn btn-success">Actualizar</button>
+        </form>
+        {{/if}}
+        
     </div>
     <div>
         <a class="navbar-brand btn btn-success text-white rounded-pill fw-bold mt-1 mb-1 col-1"
-              href="/products/views">Volver</a>
+            href="/products/views">Volver</a>
     </div>
 </div>

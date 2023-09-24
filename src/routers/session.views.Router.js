@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getLoginViews, getRegisterViews } from "../controllers/session.views.controller.js";
+import { getLoginViews, getRegisterViews,getRestablecerViews } from "../controllers/session.views.controller.js";
 
 const router = Router()
 
@@ -9,6 +9,9 @@ router.get('/login', getLoginViews)
 
 //Vista para registrar usuarios
 router.get('/register', getRegisterViews)
+
+
+router.get("/olvidar", getRestablecerViews)
 
 
 
