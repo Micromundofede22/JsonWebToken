@@ -1,16 +1,14 @@
 import passport from "passport" //traigo libreria
 import local from 'passport-local' //traigo estrategia de la libreria
-import UserModel from '../models/user.model.js'
 import GitHubStrategy from "passport-github2"
 import { OAuth2Strategy as GoogleStrategy } from "passport-google-oauth"
 import passport_jwt from "passport-jwt"
 import { createHash, isValidPassword, extractCookie, generateToken } from '../utils.js'
-import { cartsModel } from "../models/cart.model.js"
 import config from "./config.js"
+import { UserService, CartService } from "../services/services.js"
 
 
 //variables entorno
-const adminUser= config.admin //cuenta de admin en archivo .env
 const JWT_PRIVATE_KEY= config.keyPrivateJWT
 
 
@@ -27,18 +25,16 @@ const initializePassport = () => {
         usernameField: 'email'
     }, async (req, username, password, done) => {
         const { first_name, last_name, email, age, role } = req.body
-       console.log(role)
     
         try {
-            console.log("hola")
             // BUSCA USUARIO YA REGISTRADO 
-            const user = await UserModel.findOne({ email: username })
+            const user = await UserService.getUserEmail({ email: username })
             if (user) {
                 console.log('Usuario ya existe')
                 return done(null, false)
             }
             // SI NO EXISTE USUARIO, SE REGISTRA UNO NUEVO
-            const cartForNewUser = await cartsModel.create({}) //creamos un CARRITO
+            const cartForNewUser = await CartService.create({}) //creamos un CARRITO
             // console.log(cartForNewUser)
             const newUser = {
                 first_name,
@@ -53,7 +49,7 @@ const initializePassport = () => {
                 // role: (email === adminUser) ? "admin" : "user"
             }
             
-            const result = await UserModel.create(newUser)
+            const result = await UserService.create(newUser)
             return done(null, result)
             
         } catch (err) {
@@ -66,7 +62,7 @@ const initializePassport = () => {
         usernameField: 'email'
     }, async (username, password, done) => {
         try {
-            const user = await UserModel.findOne({ email: username })
+            const user = await UserService.getUserEmail({ email: username })
             if (!user) {
                 return done(null, false)
             }
@@ -87,15 +83,15 @@ const initializePassport = () => {
     }, async (accessToken, refreshToken, profile, done) => {
         // console.log(profile)
         try {
-            const user = await UserModel.findOne({ email: profile._json.email })
+            const user = await UserService.getUserEmail({ email: profile._json.email })
             if (user) {
                 const token = generateToken(user)
                 user.token = token
                 return done(null, user)
             } else {
-                const cartForNewUser = await cartsModel.create({})
+                const cartForNewUser = await CartService.create({})
 
-                const newUser = await UserModel.create({
+                const newUser = await UserService.create({
                     first_name: profile._json.name,
                     last_name: null,
                     email: profile._json.email,
@@ -123,7 +119,7 @@ const initializePassport = () => {
         async (accessToken, refreshToken, profile, done) => {
             try {
                 // busca usuarios ya registrados
-                const user = await UserModel.findOne({ email: profile._json.email })
+                const user = await UserService.getUserEmail({ email: profile._json.email })
                 // console.log(profile) //profile tiene todos los datos del user de google
                 if (user) {
                     const token = generateToken(user)
@@ -131,8 +127,8 @@ const initializePassport = () => {
                     if (user) return done(null, user)
                     // registra nuevos usuarios
                 } else {
-                    const cartForNewUser = await cartsModel.create({})
-                    const newUser = await UserModel.create({
+                    const cartForNewUser = await CartService.create({})
+                    const newUser = await UserService.create({
                         first_name: profile._json.name,
                         last_name: profile._json.family_name,
                         email: profile._json.email,
@@ -171,7 +167,7 @@ const initializePassport = () => {
     })
 
     passport.deserializeUser(async (id, done) => {
-        const user = await UserModel.findById(id)
+        const user = await UserService.getUserById(id)
         done(null, user)
     })
 }

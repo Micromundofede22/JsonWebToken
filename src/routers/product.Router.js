@@ -11,10 +11,10 @@ import {
 const productRouter = Router()
 
 // busqueda por query
-productRouter.get("/", getAllProductsController)                               //lectura por query de todos los products
-productRouter.get("/:pid", getProductByIdController)                           // lectura por params
+productRouter.get("/", getAllProductsController)                                            //lectura por query de todos los products
+productRouter.get("/:pid", getProductByIdController)                                        // lectura por params
 productRouter.post('/',handlePolicies("ADMIN" || "PREMIUM"), createProductController)       // crear producto
-productRouter.put("/:pid",handlePolicies("ADMIN"), updateProductController)    //actualizar productos
+productRouter.put("/:pid",handlePolicies("ADMIN" || "PREMIUM"), updateProductController)    //actualizar productos
 productRouter.delete("/:pid",handlePolicies("ADMIN" || "PREMIUM"), deleteProductController) //eliminar productos
 
 // productRouter.post('/', createProductController)       // crear producto
