@@ -25,10 +25,12 @@ const initializePassport = () => {
     passport.use('registerPass', new LocalStrategy({
         passReqToCallback: true,
         usernameField: 'email'
-    }, async (req, res, username, password, done) => {
-        const { first_name, last_name, email, age } = req.body
-
+    }, async (req, username, password, done) => {
+        const { first_name, last_name, email, age, role } = req.body
+       console.log(role)
+    
         try {
+            console.log("hola")
             // BUSCA USUARIO YA REGISTRADO 
             const user = await UserModel.findOne({ email: username })
             if (user) {
@@ -37,25 +39,25 @@ const initializePassport = () => {
             }
             // SI NO EXISTE USUARIO, SE REGISTRA UNO NUEVO
             const cartForNewUser = await cartsModel.create({}) //creamos un CARRITO
+            // console.log(cartForNewUser)
             const newUser = {
                 first_name,
                 last_name,
                 email,
                 age,
+                role,
                 servicio: "local",
                 password: createHash(password),
                 file: "usuario.jpg",
                 cart: cartForNewUser._id, //al nuevo usuario le asignamos el carrito que armamos mas arriba
-                role: (email === adminUser) ? "admin" : "user"
+                // role: (email === adminUser) ? "admin" : "user"
             }
             
             const result = await UserModel.create(newUser)
-            // const token = generateToken(newUser)
-            //     newUser.token = token
             return done(null, result)
             
         } catch (err) {
-
+            
         }
     }))
 
@@ -74,7 +76,7 @@ const initializePassport = () => {
             user.token = token //a user le agrego este atributo token, asi el user que me devuelve passport ya esta dentro de un token
             return done(null, user)
         } catch (err) {
-
+          
         }
     }))
 

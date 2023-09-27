@@ -63,7 +63,10 @@ export const getProductByIdController = async (req, res, next) => {
 export const createProductController = async (req, res, next) => { //next, para que error pase al middleware del error
     try {
         const data = req.body
-
+        if(req.user.user.role == "premium"){ //si usuario premium crea el producto, se gusrda su email en el campo owner
+            data.owner= req.user.user.email
+            // console.log(data.owner)
+        }
         // GESTION DE ERRORES MEDIANTE EL MIDDLEWARE DE ERRORES
         if(!data.title || !data.description || !data.price || !data.code || !data.stock || !data.category){
             CustomError.createError({                   //custom creador del error
@@ -107,6 +110,30 @@ export const updateProductController = async (req, res) => {
 // ELIMINAR PRODUCTOS
 export const deleteProductController = async (req, res, next) => {
     try {
+        //USUARIO PREMIUM
+        if(req.user.user.role == "premium"){
+            const id = req.params.pid
+            const product= await ProductService.getById(id)
+            console.log(product)
+            if (product == null) {
+                CustomError.createError({                   
+                    name: "Error de búsqueda",       
+                    cause: productNotFound(id), 
+                    message: "No se ha eliminado el producto",  
+                    code: EErrors.DB_ERROR      
+                })
+            }
+
+            if(product.owner === req.user.user.email){
+                const result= await ProductService.delete(id)
+                res.status(200).json({ status: "success", payload: result })
+            }else{
+                res.status(401).json({status: "error", error: "El producto no es de su autoría"})
+            }
+        }
+        
+
+        //ADMINISTRADOR
         const id = req.params.pid
         const result = await ProductService.delete(id)
         if (result == null) {

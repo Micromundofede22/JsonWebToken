@@ -9,6 +9,7 @@ const productSchema= new mongoose.Schema({
     status: {type: Boolean, default: true}, //default true, significa que no es requerido, ya que viene por defecto
     stock: {type: Number, required: true},
     category: {type: String, required: true},
+    owner: {type: String, default: "admin"},
     thumbnails: {type: [String], default:[]} // por default viene vacío, por lo que no es requerido
 });
 

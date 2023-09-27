@@ -2,7 +2,6 @@ import { Router } from "express";
 import passport from "passport";
 import { passportCall } from "../middleware/passportCall.js";
 import { uploader } from "../middleware/multer.js";
-// import { signUpMail } from "../controllers/mail.controller.js"
 import {
     postLogin,
     getFailLogin,
@@ -35,7 +34,6 @@ router.get('/failLogin', getFailLogin)
 // API register en DB
 router.post('/register',
     passport.authenticate('registerPass', { failureRedirect: '/api/session/failRegister' }),
-    // signUpMail(),
     postRegister) //si no registra, que redirija a fail 
 
 
