@@ -124,7 +124,7 @@ export const verifyToken = async (req, res) => {
         if (!userPassword) {
             //si no pongo return, y hago varios clicks en el link del email, revienta y dice 'ERR_HTTP_HEADERS_SENT', ya que envia multiples encabezados
             // return res.status(400).json({ status: "error", error: "Token no válido // Token expiró" })
-           return res.render("sessions/olvidarContra") //si el token expiró, me redirije a la vista de volver a mandar el correo con el token
+            return res.render("sessions/olvidarContra") //si el token expiró, me redirije a la vista de volver a mandar el correo con el token
         }
         const user = userPassword.email
         res.render("sessions/resetContra", { user })
@@ -139,14 +139,14 @@ export const restablecerContra = async (req, res) => {
     console.log(newPassword)
     try {
         const user = await UserService.getUserEmail({ email: req.params.user })                  //busco un usuario por su email
-    //    console.log(user.password)
+        //    console.log(user.password)
 
-        if (isValidPassword(user, newPassword) ) { //isValidPassword viene de utils
-            res.status(400).json({status:"error", error: "Las contraseñas no pueden ser iguales"})
-        }else{
-            await UserService.updateUser(user._id, { password: createHash(newPassword) }) 
+        if (isValidPassword(user, newPassword)) { //isValidPassword viene de utils
+            res.status(400).json({ status: "error", error: "Las contraseñas no pueden ser iguales" })
+        } else {
+            await UserService.updateUser(user._id, { password: createHash(newPassword) })
             res.status(200).json({ status: "success", message: "Contraseña creada con éxito" })
-            await UserPasswordService.delete({ email: req.params.user })          
+            await UserPasswordService.delete({ email: req.params.user })
         }
     } catch (err) {
         res.status(400).json({ status: "error", error: err.message })

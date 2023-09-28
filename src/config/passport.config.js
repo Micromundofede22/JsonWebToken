@@ -6,10 +6,12 @@ import passport_jwt from "passport-jwt"
 import { createHash, isValidPassword, extractCookie, generateToken } from '../utils.js'
 import config from "./config.js"
 import { UserService, CartService } from "../services/services.js"
-
+import nodemailer from "nodemailer"
 
 //variables entorno
-const JWT_PRIVATE_KEY= config.keyPrivateJWT
+const JWT_PRIVATE_KEY = config.keyPrivateJWT
+const nodemailerUSER = config.nodemailerUSER
+const nodemailerPASS = config.nodemailerPASS
 
 
 const LocalStrategy = local.Strategy        //estrategia local
@@ -25,7 +27,7 @@ const initializePassport = () => {
         usernameField: 'email'
     }, async (req, username, password, done) => {
         const { first_name, last_name, email, age, role } = req.body
-    
+
         try {
             // BUSCA USUARIO YA REGISTRADO 
             const user = await UserService.getUserEmail({ email: username })
@@ -34,26 +36,46 @@ const initializePassport = () => {
                 return done(null, false)
             }
             // SI NO EXISTE USUARIO, SE REGISTRA UNO NUEVO
-            const cartForNewUser = await CartService.create({}) //creamos un CARRITO
-            // console.log(cartForNewUser)
+            const cartForNewUser = await CartService.createCart({}) //creamos un CARRITO
             const newUser = {
                 first_name,
                 last_name,
                 email,
                 age,
                 role,
-                servicio: "local",
                 password: createHash(password),
-                file: "usuario.jpg",
                 cart: cartForNewUser._id, //al nuevo usuario le asignamos el carrito que armamos mas arriba
-                // role: (email === adminUser) ? "admin" : "user"
+                servicio: "local",
+                file: "usuario.jpg",
             }
-            
+
             const result = await UserService.create(newUser)
+
+            //ENVÍO DE EMAIL AL REGISTRARSE
+            let configNodemailer = {
+                service: "gmail",
+                auth: {
+                    user: nodemailerUSER,
+                    pass: nodemailerPASS
+                }
+            }
+            let transporter = nodemailer.createTransport(configNodemailer)
+
+            let message = {
+                from: nodemailerUSER,
+                to: email,
+                subject: "🍀Bienvenido🍀",
+                html: `Bienvenido usuario ${email}. Haz click en el siguiente enlace para convertirte en un micromundista
+          <a href="http://localhost:8080">Click Aquí</a>`
+            }
+            await transporter.sendMail(message)
+
+
+
             return done(null, result)
-            
+
         } catch (err) {
-            
+
         }
     }))
 
@@ -72,7 +94,7 @@ const initializePassport = () => {
             user.token = token //a user le agrego este atributo token, asi el user que me devuelve passport ya esta dentro de un token
             return done(null, user)
         } catch (err) {
-          
+
         }
     }))
 
@@ -89,7 +111,7 @@ const initializePassport = () => {
                 user.token = token
                 return done(null, user)
             } else {
-                const cartForNewUser = await CartService.create({})
+                const cartForNewUser = await CartService.createCart({})
 
                 const newUser = await UserService.create({
                     first_name: profile._json.name,
@@ -127,7 +149,7 @@ const initializePassport = () => {
                     if (user) return done(null, user)
                     // registra nuevos usuarios
                 } else {
-                    const cartForNewUser = await CartService.create({})
+                    const cartForNewUser = await CartService.createCart({})
                     const newUser = await UserService.create({
                         first_name: profile._json.name,
                         last_name: profile._json.family_name,
