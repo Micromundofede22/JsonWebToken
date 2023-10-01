@@ -16,7 +16,8 @@ import {
     cargaImage,
     postOlvidar,
     verifyToken,
-    restablecerContra
+    restablecerContra,
+    getVerifyUser
 } from "../controllers/session.controller.js"
 
 
@@ -36,8 +37,12 @@ router.post('/register',
     passport.authenticate('registerPass', { failureRedirect: '/api/session/failRegister' }),
     postRegister) //si no registra, que redirija a fail 
 
+// VERIFICACION DE CUENTA 
+router.get("/verify-user/:user", getVerifyUser)
 
 router.get('/failRegister', getFailRegister)
+
+
 
 // ruta que conecta hacia git
 router.get("/github",

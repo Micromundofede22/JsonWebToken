@@ -9,7 +9,7 @@ const JWT_PRIVATE_KEY = config.keyPrivateJWT
 
 // hashea contraseña
 export const createHash = password => { //crea hash y se usa en la config de passport
-    return bcrypt.hashSync(password, bcrypt.genSaltSync(10))
+    return bcrypt.hashSync(password, bcrypt.genSaltSync(10)) //cantidad de caracteres que quiero que tenga
 }
 
 // validacion
@@ -23,6 +23,7 @@ export const generateToken = user => {
     return token
 }
 
+//genera un string random, como lo hace la libreria jwt, pero manual, me sirve como token
 export const generateRandomString= (num)=>{
     return [...Array(num)].map(()=>{
         const randomNum= ~~(Math.random()* 36)
@@ -40,12 +41,6 @@ export const extractCookie = req => {
 
 //FAKER, MOCK DATOS FALSOS PARA PRUEBAS 
 export const generateUser= () =>{
-    // return {
-    //     name: faker.person.firstName(),
-    //     lastname: faker.person.lastName(),
-    //     country: faker.location.country(),
-    //     favorite_song: faker.music.songName()
-    // }
     return{
 
         title: faker.commerce.product(),

@@ -25,6 +25,8 @@ import { handlePolicies } from "./middleware/auth.middleware.js";
 import errorMiddleware from "./middleware/error.middleware.js"
 import logger from "./loggers.js";
 // import clusterRouter from "./routers/cluster.Router.js"
+import swaggerJsdoc from 'swagger-jsdoc';             //DOCUMENTACIÓN API   
+import swaggerUiExpress from 'swagger-ui-express';    //DOCUMENTACIÓN API 
 
 
 //variables de entorno
@@ -32,6 +34,24 @@ const port = config.port
 const mongoUri = config.mongo_uri
 
 const app = express()
+
+
+//CONFIGURACIÓN DOCUMENTACIÓN API SWAGGER
+export const swaggerOptions = {
+    definition: {
+        openapi: '3.1.0', 
+        info: {
+            title: 'Ecommerce Micromundo',
+            version: '1.0.0', //versión de la app que estoy documentando
+        }
+    },
+    apis: [
+        `./docs/**/*.yaml`, //extensión de archivo que lee swagger. (/**/ significa en cualquier carpeta. (*.yaml)significa cualquier nombre de archivo de extensión yaml )
+    ],
+};
+const specs = swaggerJsdoc(swaggerOptions);
+app.use('/docs', swaggerUiExpress.serve, swaggerUiExpress.setup(specs));
+
 
 
 //configuracion del motor de plantillas

@@ -6,8 +6,6 @@ import { createHash, generateRandomString, isValidPassword } from "../utils.js";
 import nodemailer from "nodemailer";//mail
 
 
-
-
 //variable de entorno en carpeta config, archivo config
 const JWT_COOKIE_NAME = config.cookieNameJWT
 const JWT_PRIVATE_KEY = config.keyPrivateJWT
@@ -25,6 +23,23 @@ export const getFailLogin = (req, res) => {
 
 export const postRegister = async (req, res) => {
     res.redirect('/session/login') //si registra con middleware passport de routes, redirije al login
+}
+
+export const getVerifyUser= async(req,res)=>{
+    try{
+        const user= await UserService.getUserEmail({email: req.params.user})
+        
+        if(!user){
+            return res.status(400).json({status: "error", error: "El usuario no esta registrado en nuestra base de datos. Registrese primero"})
+        }
+        const userVerified= await UserService.updateUser(user._id, {status: "VERIFIED"})
+
+        return res.render("sessions/userVerified", {userVerified})
+
+    }catch(err){
+        res.status(400).json({status: "error", error: err.message})
+    }
+
 }
 
 export const getFailRegister = (req, res) => {
@@ -135,8 +150,7 @@ export const verifyToken = async (req, res) => {
 
 export const restablecerContra = async (req, res) => {
     const newPassword = req.body.newPassword
-
-    console.log(newPassword)
+    // console.log(newPassword)
     try {
         const user = await UserService.getUserEmail({ email: req.params.user })                  //busco un usuario por su email
         //    console.log(user.password)

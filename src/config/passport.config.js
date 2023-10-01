@@ -64,13 +64,11 @@ const initializePassport = () => {
             let message = {
                 from: nodemailerUSER,
                 to: email,
-                subject: "🍀Bienvenido🍀",
-                html: `Bienvenido usuario ${email}. Haz click en el siguiente enlace para convertirte en un micromundista
-          <a href="http://localhost:8080">Click Aquí</a>`
+                subject: "🍀Bienvenido.Validar cuenta🍀",
+                html: `Bienvenido usuario ${email}. Haz click en el siguiente enlace para verificar tu cuenta:
+          <a href="http://localhost:8080/api/session/verify-user/${email}">Click Aquí</a>`
             }
             await transporter.sendMail(message)
-
-
 
             return done(null, result)
 
@@ -89,6 +87,10 @@ const initializePassport = () => {
                 return done(null, false)
             }
             if (!isValidPassword(user, password)) return done(null, false)
+            if(user.status == "UNVERIFIED"){
+                console.log("Verifique la cuenta, haciendo click en el link que se envió a su email")
+                return done(null, false)
+            } 
 
             const token = generateToken(user) //generatetoken importado de utils, donde mete los datos del user en un token
             user.token = token //a user le agrego este atributo token, asi el user que me devuelve passport ya esta dentro de un token
